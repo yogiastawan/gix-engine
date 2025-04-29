@@ -1,13 +1,16 @@
 
 #include "scene.h"
 
-static bool init(GixScene *self) {
+static bool clear_scene_init(GixScene *self) {
+    gix_info("Init clear scene");
+    // Init scene here
     self->compute_pipeline = NULL;
 
     return true;
 }
 
-static bool update(GixScene *self, const SDL_Event *event) {
+static bool clear_scene_update(GixScene *self, const SDL_Event *event) {
+    // Handle event here
     self->compute_pipeline = NULL;
     switch (event->gbutton.button) {
         case SDL_GAMEPAD_BUTTON_BACK:
@@ -20,7 +23,8 @@ static bool update(GixScene *self, const SDL_Event *event) {
 
     return true;
 }
-static void draw(GixScene *self) {
+static void clear_scene_draw(GixScene *self) {
+    // Draw frame here
     SDL_GPUCommandBuffer *cmd_buffer = SDL_AcquireGPUCommandBuffer(self->app->device);
     if (!cmd_buffer) {
         gix_log_error("Couldn't aquire GPU command buffer");
@@ -39,12 +43,14 @@ static void draw(GixScene *self) {
 
     SDL_SubmitGPUCommandBuffer(cmd_buffer);
 }
-static void quit(GixScene *self) {
+static void clear_scene_quit(GixScene *self) {
+    gix_info("Quit clear scene");
+    // Deinit scene here
     self->numb_compute_pipeline = 0;
 }
 GixScene *create_scene(GixApp *app) {
     GixScene *scene = gix_scene_new(app);
-    gix_scene_impl(scene, init, update, draw, quit);
+    gix_scene_impl(scene, clear_scene_init, clear_scene_update, clear_scene_draw, clear_scene_quit);
 
     return scene;
 }
