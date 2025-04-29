@@ -23,11 +23,11 @@ extern C {
 
         // list of graphic pipline
         SDL_GPUGraphicsPipeline** graphic_pipeline;
-        uint8_t numb_graphic_pipeline;
+        Uint8 numb_graphic_pipeline;
 
         // list of compute pipline
         SDL_GPUGraphicsPipeline** compute_pipeline;
-        uint8_t numb_compute_pipeline;
+        Uint8 numb_compute_pipeline;
 
         // impl
         SceneInit scene_init;
@@ -39,8 +39,8 @@ extern C {
     GixScene* gix_scene_new(GixApp * app);
     GixScene* gix_scene_from_file(GixApp * app);
     void gix_scene_impl(GixScene * scene, SceneInit init_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func);
-    uint8_t gix_scene_graphic_pipeline_size(const GixScene* scene);
-    uint8_t gix_scene_compute_pipeline_size(const GixScene* scene);
+    Uint8 gix_scene_graphic_pipeline_size(const GixScene* scene);
+    Uint8 gix_scene_compute_pipeline_size(const GixScene* scene);
     void gix_scene_destroy(GixScene * scene);
 
     struct _GixApp {

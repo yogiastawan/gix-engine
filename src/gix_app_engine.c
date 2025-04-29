@@ -39,22 +39,22 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneUpdate update_fun
     scene->scene_quit = quit_func;
 }
 
-uint8_t gix_scene_graphic_pipeline_size(const GixScene* scene) {
+Uint8 gix_scene_graphic_pipeline_size(const GixScene* scene) {
     return scene->numb_graphic_pipeline;
 }
 
-uint8_t gix_scene_compute_pipeline_size(const GixScene* scene) {
+Uint8 gix_scene_compute_pipeline_size(const GixScene* scene) {
     return scene->numb_compute_pipeline;
 }
 void gix_scene_destroy(GixScene* scene) {
     gix_info("Destroy GixScene");
 
     gix_if_null_exit(scene, gix_log("Can not destroy NULl of scene"));
-    for (uint8_t i = 0; i < scene->numb_graphic_pipeline; i++) {
+    for (Uint8 i = 0; i < scene->numb_graphic_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->graphic_pipeline[i]);
     }
 
-    for (uint8_t i = 0; i < scene->numb_graphic_pipeline; i++) {
+    for (Uint8 i = 0; i < scene->numb_graphic_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->compute_pipeline[i]);
     }
 
