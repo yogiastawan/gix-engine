@@ -30,6 +30,10 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneUpdate update_fun
     scene->scene_quit = quit_func;
 }
 
+// TODO! implement load scene from file protobuf
+GixScene* gix_scene_from_file(GixApp* app) {
+    return NULL;
+}
 uint8_t gix_scene_graphic_pipeline_size(const GixScene* scene) {
     return scene->numb_graphic_pipeline;
 }
