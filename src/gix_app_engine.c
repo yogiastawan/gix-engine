@@ -22,6 +22,15 @@ GixScene* gix_scene_new(GixApp* app) {
     return scene;
 }
 
+// TODO! implement load scene from file protobuf
+GixScene* gix_scene_from_file(GixApp* app) {
+    gix_info("Create new GixScene");
+
+    GixScene* scene = SDL_malloc(sizeof(GixScene));
+    scene->app = app;
+    return scene;
+}
+
 void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func) {
     gix_if_null_exit(scene, gix_log("Can not destroy of NULL GixScene"));
     scene->scene_init = init_func;
@@ -30,10 +39,6 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneUpdate update_fun
     scene->scene_quit = quit_func;
 }
 
-// TODO! implement load scene from file protobuf
-GixScene* gix_scene_from_file(GixApp* app) {
-    return NULL;
-}
 uint8_t gix_scene_graphic_pipeline_size(const GixScene* scene) {
     return scene->numb_graphic_pipeline;
 }
