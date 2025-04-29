@@ -4,5 +4,6 @@
 #include <gix_engine/gix_app_engine.h>
 #include <gix_engine/gix_checker.h>
 #include <gix_engine/gix_log.h>
+#include <gix_engine/gix_shader.h>
 
 #endif /* __GIX_ENGINE_H__ */
