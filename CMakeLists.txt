@@ -39,6 +39,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(BUILD_DEBUG)
 endif()
 
+# Backend Shader format choose
+if(NOT DEFINED SHADER_FORMAT)
+    add_compile_definitions(GIX_VULKAN)
+else()
+    add_compile_definitions(${SHADER_FORMAT})
+endif()
+
+
 add_subdirectory(src)
 target_include_directories(${PROJECT_NAME} PRIVATE src/include)
 
