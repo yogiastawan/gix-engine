@@ -54,7 +54,7 @@ void gix_scene_destroy(GixScene* scene) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->graphic_pipeline[i]);
     }
 
-    for (Uint8 i = 0; i < scene->numb_graphic_pipeline; i++) {
+    for (Uint8 i = 0; i < scene->numb_compute_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->compute_pipeline[i]);
     }
 
