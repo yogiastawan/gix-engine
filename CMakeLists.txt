@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.21.0)
 
 project(gix-engine VERSION 0.1.0 LANGUAGES C)
 
@@ -11,9 +11,18 @@ option(BUILD_STATIC "Build static library" ON)
 message(STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLE}")
 message(STATUS "BUILD_STATIC: ${BUILD_STATIC}")
 
+if(NOT DEFINED SDL3_DIR)
+    set(SDL3_DIR libs/SDL3-3.2.10)
+endif()
+
+if(NOT DEFINED CGLM_DIR)
+    set(CGLM_DIR libs/cglm-0.9.6)
+endif()
+
+
 # add libs
-add_subdirectory(libs/SDL3-3.2.10)
-add_subdirectory(libs/cglm-0.9.6)
+add_subdirectory(${SDL3_DIR})
+add_subdirectory(${CGLM_DIR})
 
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
