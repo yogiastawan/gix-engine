@@ -8,7 +8,7 @@
 extern C {
 #endif
 
-    SDL_GPUShader* gix_load_shader(GixApp * app,
+    SDL_GPUShader* gix_load_shader(SDL_GPUDevice * device,
                                    const char* shader_file,
                                    SDL_GPUShaderStage shader_stage,
                                    Uint32 sampler_count,

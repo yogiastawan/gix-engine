@@ -2,14 +2,14 @@
 #include <gix_engine/gix_log.h>
 #include <gix_engine/gix_shader.h>
 
-SDL_GPUShader* gix_load_shader(GixApp* app,
+SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device,
                                const char* shader_file,
                                SDL_GPUShaderStage shader_stage,
                                Uint32 sampler_count,
                                Uint32 uniform_buffer_count,
                                Uint32 storage_buffer_count,
                                Uint32 storage_texture_count) {
-    SDL_GPUShaderFormat backend_format = SDL_GetGPUShaderFormats(app->device);
+    SDL_GPUShaderFormat backend_format = SDL_GetGPUShaderFormats(device);
     const char* entry_point = NULL;
 #ifdef GIX_VULKAN
     entry_point = "main";
@@ -33,6 +33,7 @@ SDL_GPUShader* gix_load_shader(GixApp* app,
     SDL_GPUShaderCreateInfo shader_info = {
         .code = shader_code,
         .code_size = shader_code_size,
+        .entrypoint = entry_point,
         .format = backend_format,
         .stage = shader_stage,
         .num_samplers = sampler_count,
@@ -42,7 +43,7 @@ SDL_GPUShader* gix_load_shader(GixApp* app,
 
     };
 
-    SDL_GPUShader* shader = SDL_CreateGPUShader(app->device, &shader_info);
+    SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shader_info);
     gix_if_null_exit(shader, gix_log_error("Cannot create shader"));
 
     SDL_free(shader_code);
