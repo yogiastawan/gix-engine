@@ -25,18 +25,21 @@ extern C {
         exec;                      \
     }
 #define gix_if_exit(logic, exec) \
+    ++exit_code;                 \
     if (logic) {                 \
         exec;                    \
-        exit(exit_code + 1);     \
+        exit(exit_code);         \
     }
 
 #define gix_if_null_exit(ptr, exec) \
+    ++exit_code;                    \
     if (!ptr) {                     \
         exec;                       \
         exit(exit_code + 1);        \
     }
 
 #define gix_if_not_null_exit(ptr, exec) \
+    ++exit_code;                        \
     if (!ptr) {                         \
         exec;                           \
         exit(exit_code + 1);            \
