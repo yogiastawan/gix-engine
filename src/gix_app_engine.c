@@ -84,22 +84,30 @@ GixApp* gix_app_new(const char* name) {
 }
 
 void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
+    gix_info("Set loading scene to GixApp");
+
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
     gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
     app->loading_scene = scene;
 }
 
 void gix_app_set_scene(GixApp* app, GixScene* scene) {
+    gix_info("Set scene to GixApp");
+
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
     gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
 
     // TODO! Loading scene here
+    app->is_onload_scene = true;
     scene->scene_init(scene);
     app->current_scene = scene;
+    app->is_onload_scene = false;
 }
 
 void gix_app_run(GixApp* app) {
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+
+    gix_if_exit(!app->loading_scene && !app->current_scene, gix_log("GixApp scene must not NULL"));
 
     // show window
     SDL_ShowWindow(app->window);
