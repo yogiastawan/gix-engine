@@ -41,11 +41,11 @@ void gix_scene_destroy(GixScene* scene) {
     gix_info("Destroy GixScene");
 
     gix_if_null_exit(scene, gix_log("Can not destroy NULl of scene"));
-    for (uint8_t i = 0; i < gix_scene_graphic_pipeline_size(scene); i++) {
+    for (uint8_t i = 0; i < scene->numb_graphic_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->graphic_pipeline[i]);
     }
 
-    for (uint8_t i = 0; i < gix_scene_compute_pipeline_size(scene); i++) {
+    for (uint8_t i = 0; i < scene->numb_graphic_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->compute_pipeline[i]);
     }
 
@@ -94,6 +94,7 @@ void gix_app_set_scene(GixApp* app, GixScene* scene) {
     gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
 
     // TODO! Loading scene here
+    scene->scene_init(scene);
     app->current_scene = scene;
 }
 
@@ -138,10 +139,12 @@ void gix_app_destroy(GixApp* app) {
     gix_if_null_exit(app, gix_log("Can not destroy of NULL GixApp"));
 
     if (app->loading_scene) {
+        app->loading_scene->scene_quit(app->loading_scene);
         gix_scene_destroy(app->loading_scene);
     }
 
     if (app->current_scene) {
+        app->current_scene->scene_quit(app->current_scene);
         gix_scene_destroy(app->current_scene);
     }
 
