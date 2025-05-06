@@ -108,7 +108,7 @@ void gix_app_set_scene(GixApp* app, GixScene* scene) {
 
     // TODO! Loading scene here
     app->is_onload_scene = true;
-    scene->scene_init(scene);
+    gix_scene_init(scene);
     app->current_scene = scene;
     app->is_onload_scene = false;
 }
@@ -138,15 +138,14 @@ void gix_app_run(GixApp* app) {
                     break;
             }
 
-            app->current_scene->scene_update(app->current_scene, &event);
+            gix_scene_update(app->current_scene, &event);
         }
 
         if (app->is_onload_scene && app->loading_scene) {
-            app->loading_scene->scene_draw(app->loading_scene);
+            gix_scene_draw(app->loading_scene);
             continue;
         }
-
-        app->current_scene->scene_draw(app->current_scene);
+        gix_scene_draw(app->current_scene);
     }
 }
 

@@ -7,6 +7,11 @@
 extern C {
 #endif
 
+#define gix_scene_init(scene) scene->scene_init(scene)
+#define gix_scene_update(scene, event) scene->scene_update(scene, event)
+#define gix_scene_draw(scene) scene->scene_draw(scene)
+#define gix_scene_quit(scene) scene->scene_quit(scene)
+
     static bool is_inited = false;
 
     typedef struct _GixScene GixScene;
