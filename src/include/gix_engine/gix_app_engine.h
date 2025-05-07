@@ -13,8 +13,6 @@ extern C {
 #define gix_scene_draw(scene) scene->scene_draw(scene)
 #define gix_scene_quit(scene) scene->scene_quit(scene)
 
-    static bool is_inited = false;
-
     typedef struct _GixScene GixScene;
     typedef struct _GixApp GixApp;
 
@@ -51,25 +49,15 @@ extern C {
     Uint8 gix_scene_compute_pipeline_size(const GixScene* scene);
     void gix_scene_destroy(GixScene * scene);
 
-    struct _GixApp {
-        SDL_Window* window;
-        SDL_GPUDevice* device;
-        GixScene* loading_scene;
-        GixScene* current_scene;
-
-        bool is_onload_scene;
-        Uint64 delta_time;
-        Uint64 last_tick;
-        Uint64 current_tick;
-    };
+    struct _GixApp;
 
     extern void gix_app_init(GixApp * app);
-
-    GixApp* gix_app_new(const char* name);
+    void gix_app_set_window_fullscreen(GixApp * app);
+    void gix_app_set_window_borderless(GixApp * app);
     void gix_app_set_loading_scene(GixApp * app, GixScene * scene);
-    void gix_app_set_scene(GixApp * app, GixScene * scene);
-    void gix_app_run(GixApp * app);
-    void gix_app_destroy(GixApp * app);
+    SDL_AppResult gix_app_set_scene(GixApp * app, GixScene * scene);
+    SDL_Window* gix_app_get_window(GixApp * app);
+    SDL_GPUDevice* gix_app_get_gpu_device(GixApp * app);
 
 #ifdef __cplusplus
 }

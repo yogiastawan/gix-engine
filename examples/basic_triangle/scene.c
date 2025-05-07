@@ -6,20 +6,23 @@ static bool basic_triangle_init(GixScene *self) {
     gix_info("Init basic triangle");
     // Init scene here
 
+    SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
+    SDL_Window *window = gix_app_get_window(self->app);
+
     // create 1 graphic pipeline
     self->numb_graphic_pipeline = 1;
     self->graphic_pipeline = SDL_malloc(sizeof(SDL_GPUGraphicsPipeline *));
 
     // load shader
-    SDL_GPUShader *vertex_shader = gix_load_shader(self->app->device, "./shader/SPIRV/basic_triangle.vert.spv",
+    SDL_GPUShader *vertex_shader = gix_load_shader(device, "./shader/SPIRV/basic_triangle.vert.spv",
                                                    SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, 0);
-    SDL_GPUShader *frag_shader = gix_load_shader(self->app->device, "./shader/SPIRV/triangle_fill.frag.spv",
+    SDL_GPUShader *frag_shader = gix_load_shader(device, "./shader/SPIRV/triangle_fill.frag.spv",
                                                  SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
 
     // create pipeline
     SDL_GPUColorTargetDescription color_target_desc[] = {
         (SDL_GPUColorTargetDescription){
-            .format = SDL_GetGPUSwapchainTextureFormat(self->app->device, self->app->window)}};
+            .format = SDL_GetGPUSwapchainTextureFormat(device, window)}};
 
     SDL_GPUGraphicsPipelineCreateInfo pipeline_info = {
         .target_info = {
@@ -32,12 +35,12 @@ static bool basic_triangle_init(GixScene *self) {
         .rasterizer_state.fill_mode = SDL_GPU_FILLMODE_FILL,
     };
 
-    self->graphic_pipeline[0] = SDL_CreateGPUGraphicsPipeline(self->app->device, &pipeline_info);
+    self->graphic_pipeline[0] = SDL_CreateGPUGraphicsPipeline(device, &pipeline_info);
 
     gix_if_null_exit(self->graphic_pipeline[0], gix_log_error("Couldn't create graphic pipeline"));
 
-    SDL_ReleaseGPUShader(self->app->device, vertex_shader);
-    SDL_ReleaseGPUShader(self->app->device, frag_shader);
+    SDL_ReleaseGPUShader(device, vertex_shader);
+    SDL_ReleaseGPUShader(device, frag_shader);
 
     return true;
 }
@@ -51,12 +54,12 @@ static void basic_triangle_update(GixScene *self, Uint64 delta_time) {
 }
 static void basic_triangle_draw(GixScene *self) {
     // Draw frame here
-    SDL_GPUCommandBuffer *cmd_buffer = SDL_AcquireGPUCommandBuffer(self->app->device);
+    SDL_GPUCommandBuffer *cmd_buffer = SDL_AcquireGPUCommandBuffer(gix_app_get_gpu_device(self->app));
     if (!cmd_buffer) {
         gix_log_error("Couldn't aquire GPU command buffer");
     }
     SDL_GPUTexture *swapchain_texture;
-    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd_buffer, self->app->window, &swapchain_texture, NULL, NULL)) {
+    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd_buffer, gix_app_get_window(self->app), &swapchain_texture, NULL, NULL)) {
         SDL_GPUColorTargetInfo colorTargetInfo = {0};
         colorTargetInfo.texture = swapchain_texture;
         colorTargetInfo.clear_color = (SDL_FColor){0.3f, 0.4f, 0.5f, 1.0f};

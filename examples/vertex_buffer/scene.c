@@ -18,20 +18,23 @@ MyVertex vertices_color[] = {
 
 static bool vertex_buffer_scene_init(GixScene* self) {
     gix_info("Init vertex buffer scene");
+
+    SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
+    SDL_Window* window = gix_app_get_window(self->app);
     // Init scene here
     self->graphic_pipeline = SDL_malloc(sizeof(SDL_GPUGraphicsPipeline*));
     self->numb_graphic_pipeline = 1;
 
     // load shader
-    SDL_GPUShader* vertex_shader = gix_load_shader(self->app->device, "./shader/SPIRV/vertex_buffer.vert.spv",
+    SDL_GPUShader* vertex_shader = gix_load_shader(device, "./shader/SPIRV/vertex_buffer.vert.spv",
                                                    SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, 0);
-    SDL_GPUShader* frag_shader = gix_load_shader(self->app->device, "./shader/SPIRV/vertex_buffer.frag.spv",
+    SDL_GPUShader* frag_shader = gix_load_shader(device, "./shader/SPIRV/vertex_buffer.frag.spv",
                                                  SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
 
     //  pipeline color target description
     SDL_GPUColorTargetDescription color_target_desc[] = {
         (SDL_GPUColorTargetDescription){
-            .format = SDL_GetGPUSwapchainTextureFormat(self->app->device, self->app->window)}};
+            .format = SDL_GetGPUSwapchainTextureFormat(device, window)}};
     // create vertex buffer description
     SDL_GPUVertexBufferDescription vertex_buffer_descs[1] = {
         {
@@ -72,10 +75,10 @@ static bool vertex_buffer_scene_init(GixScene* self) {
         .vertex_shader = vertex_shader,
         .fragment_shader = frag_shader,
     };
-    self->graphic_pipeline[0] = SDL_CreateGPUGraphicsPipeline(self->app->device, &pipeline_info);
+    self->graphic_pipeline[0] = SDL_CreateGPUGraphicsPipeline(device, &pipeline_info);
     gix_if_null_exit(self->graphic_pipeline[0], gix_log_error("Couldn't create graphic pipeline"));
-    SDL_ReleaseGPUShader(self->app->device, vertex_shader);
-    SDL_ReleaseGPUShader(self->app->device, frag_shader);
+    SDL_ReleaseGPUShader(device, vertex_shader);
+    SDL_ReleaseGPUShader(device, frag_shader);
 
     // create vertex buffer info
     SDL_GPUBufferCreateInfo buffer_info = {
@@ -83,7 +86,7 @@ static bool vertex_buffer_scene_init(GixScene* self) {
         .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
     };
     // create vertex buffer
-    vertex_buffer = SDL_CreateGPUBuffer(self->app->device, &buffer_info);
+    vertex_buffer = SDL_CreateGPUBuffer(device, &buffer_info);
     gix_if_null_exit(vertex_buffer, gix_log_error("Couldn't create vertex buffer"));
     // create transfer buffer create info
     SDL_GPUTransferBufferCreateInfo transfer_buffer_info = {
@@ -91,19 +94,19 @@ static bool vertex_buffer_scene_init(GixScene* self) {
         .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
     };
     // create transfer buffer
-    SDL_GPUTransferBuffer* transfer_buffer = SDL_CreateGPUTransferBuffer(self->app->device, &transfer_buffer_info);
+    SDL_GPUTransferBuffer* transfer_buffer = SDL_CreateGPUTransferBuffer(device, &transfer_buffer_info);
     // map gpu tranfer buffer
-    MyVertex* transfer_data = SDL_MapGPUTransferBuffer(self->app->device, transfer_buffer, false);
+    MyVertex* transfer_data = SDL_MapGPUTransferBuffer(device, transfer_buffer, false);
     gix_if_null_exit(transfer_data, gix_log_error("Couldn't map transfer buffer"));
     // copy data to transfer buffer
     SDL_memcpy(transfer_data, vertices_color, sizeof(MyVertex) * 3);
     // unmap transfer buffer
-    SDL_UnmapGPUTransferBuffer(self->app->device, transfer_buffer);
+    SDL_UnmapGPUTransferBuffer(device, transfer_buffer);
 
     // upload transfer data to vertex buffer
 
     //  create command buffer
-    SDL_GPUCommandBuffer* upload_cmd_buffer = SDL_AcquireGPUCommandBuffer(self->app->device);
+    SDL_GPUCommandBuffer* upload_cmd_buffer = SDL_AcquireGPUCommandBuffer(device);
     if (!upload_cmd_buffer) {
         gix_log_error("Couldn't aquire GPU command buffer");
     }
@@ -130,7 +133,7 @@ static bool vertex_buffer_scene_init(GixScene* self) {
     }
 
     // release transfer buffer
-    SDL_ReleaseGPUTransferBuffer(self->app->device, transfer_buffer);
+    SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
     return true;
 }
 
@@ -147,19 +150,16 @@ static void scene_event(GixScene* self, const SDL_Event* event) {
     }
 }
 static void vertex_buffer_scene_update(GixScene* self, Uint64 delta_time) {
-
-
-    
 }
 
 static void vertex_buffer_scene_draw(GixScene* self) {
     // Draw frame here
-    SDL_GPUCommandBuffer* cmd_buffer = SDL_AcquireGPUCommandBuffer(self->app->device);
+    SDL_GPUCommandBuffer* cmd_buffer = SDL_AcquireGPUCommandBuffer(gix_app_get_gpu_device(self->app));
     if (!cmd_buffer) {
         gix_log_error("Couldn't aquire GPU command buffer");
     }
     SDL_GPUTexture* swapchain_texture;
-    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd_buffer, self->app->window, &swapchain_texture, NULL, NULL)) {
+    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd_buffer, gix_app_get_window(self->app), &swapchain_texture, NULL, NULL)) {
         SDL_GPUColorTargetInfo colorTargetInfo = {0};
         colorTargetInfo.texture = swapchain_texture;
         colorTargetInfo.clear_color = (SDL_FColor){0.3f, 0.4f, 0.5f, 1.0f};
@@ -185,12 +185,12 @@ static void vertex_buffer_scene_draw(GixScene* self) {
 static void vertex_buffer_scene_quit(GixScene* self) {
     gix_info("Quit vertex buffer scene");
     // Deinit scene here
-    SDL_ReleaseGPUBuffer(self->app->device, vertex_buffer);
+    SDL_ReleaseGPUBuffer(gix_app_get_gpu_device(self->app), vertex_buffer);
     self->numb_compute_pipeline = 0;
 }
 GixScene* create_scene(GixApp* app) {
     GixScene* scene = gix_scene_new(app);
-    gix_scene_impl(scene, vertex_buffer_scene_init,scene_event, vertex_buffer_scene_update, vertex_buffer_scene_draw, vertex_buffer_scene_quit);
+    gix_scene_impl(scene, vertex_buffer_scene_init, scene_event, vertex_buffer_scene_update, vertex_buffer_scene_draw, vertex_buffer_scene_quit);
 
     return scene;
 }

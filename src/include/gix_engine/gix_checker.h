@@ -10,6 +10,12 @@ extern C {
 
     static size_t exit_code = 0;
 
+#define gix_if_return(logic, exec, ret) \
+    if (logic) {                        \
+        exec;                           \
+        return ret;                     \
+    }
+
 #define gix_if(logical, exec) \
     if (logical) {            \
         exec;                 \

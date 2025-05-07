@@ -28,12 +28,12 @@ static void scene_update(GixScene *self, Uint64 delta_time) {
 }
 static void clear_scene_draw(GixScene *self) {
     // Draw frame here
-    SDL_GPUCommandBuffer *cmd_buffer = SDL_AcquireGPUCommandBuffer(self->app->device);
+    SDL_GPUCommandBuffer *cmd_buffer = SDL_AcquireGPUCommandBuffer(gix_app_get_gpu_device(self->app));
     if (!cmd_buffer) {
         gix_log_error("Couldn't aquire GPU command buffer");
     }
     SDL_GPUTexture *swapchain_texture;
-    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd_buffer, self->app->window, &swapchain_texture, NULL, NULL)) {
+    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd_buffer, gix_app_get_window(self->app), &swapchain_texture, NULL, NULL)) {
         SDL_GPUColorTargetInfo colorTargetInfo = {0};
         colorTargetInfo.texture = swapchain_texture;
         colorTargetInfo.clear_color = (SDL_FColor){0.3f, 0.4f, 0.5f, 1.0f};

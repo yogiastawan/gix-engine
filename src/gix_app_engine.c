@@ -6,10 +6,24 @@
 #include <gix_engine/gix_checker.h>
 #include <gix_engine/gix_log.h>
 
+struct _GixApp {
+    SDL_Window* window;
+    SDL_GPUDevice* device;
+    GixScene* loading_scene;
+    GixScene* current_scene;
+
+    bool is_onload_scene;
+    Uint64 delta_time;
+    Uint64 last_tick;
+    Uint64 current_tick;
+};
+
+static GixApp* gix_app_new(const char* name);
+static void gix_app_destroy(GixApp* app);
+
 static void gix_app_sdl_init() {
     bool init_result = SDL_Init(SDL_INIT_VIDEO);
     gix_if_exit(!init_result, gix_log_error("Couldn't init SDL"));
-    is_inited = true;
 }
 // #ifdef GIX_APP_MAIN
 
@@ -137,9 +151,7 @@ GixApp* gix_app_new(const char* name) {
 
     gix_if_null_exit(name, gix_log("Name GixApp shouldn't NULL"));
 
-    if (!is_inited) {
-        gix_app_sdl_init();
-    }
+    gix_app_sdl_init();
 
     GixApp* app = SDL_malloc(sizeof(GixApp));
 
@@ -162,6 +174,14 @@ GixApp* gix_app_new(const char* name) {
     return app;
 }
 
+void gix_app_set_window_fullscreen(GixApp* app) {
+    SDL_SetWindowFullscreen(app->window, true);
+}
+
+void gix_app_set_window_borderless(GixApp* app) {
+    SDL_SetWindowBordered(app->window, false);
+}
+
 void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
     gix_info("Set loading scene to GixApp");
 
@@ -170,7 +190,7 @@ void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
     app->loading_scene = scene;
 }
 
-void gix_app_set_scene(GixApp* app, GixScene* scene) {
+SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene) {
     gix_info("Set scene to GixApp");
 
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
@@ -178,9 +198,18 @@ void gix_app_set_scene(GixApp* app, GixScene* scene) {
 
     // TODO! Loading scene here
     app->is_onload_scene = true;
-    gix_if_exit(!gix_scene_init(scene), gix_log("GixScene init failed"));
+    gix_if_return(!gix_scene_init(scene), gix_log("GixScene init failed"), SDL_APP_FAILURE);
     app->current_scene = scene;
     app->is_onload_scene = false;
+    return SDL_APP_CONTINUE;
+}
+
+ SDL_Window* gix_app_get_window(GixApp* app) {
+    return app->window;
+}
+
+ SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app) {
+    return app->device;
 }
 
 void gix_app_destroy(GixApp* app) {
