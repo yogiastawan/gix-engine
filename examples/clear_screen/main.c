@@ -5,4 +5,5 @@
 
 void gix_app_init(GixApp *app) {
     gix_app_set_scene(app, create_scene(app));
+    gix_app_set_window_fullscreen(app);
 }
