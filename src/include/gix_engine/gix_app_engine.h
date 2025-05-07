@@ -137,6 +137,8 @@ extern C {
      */
     void gix_app_set_window_position(GixApp * app, int x, int y);
 
+    void gix_app_set_window_resizeable(GixApp * app, bool resizeable);
+
     /**
      * @brief Set GixApp loading scene
      *

@@ -189,6 +189,11 @@ void gix_app_set_window_position(GixApp* app, int x, int y) {
     SDL_SetWindowPosition(app->window, x, y);
 }
 
+void gix_app_set_window_resizeable(GixApp* app, bool resizeable) {
+    SDL_SetWindowResizable(app->window, resizeable);
+    gix_log_error("Set window resizeable");
+}
+
 void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
     gix_info("Set loading scene to GixApp");
 
