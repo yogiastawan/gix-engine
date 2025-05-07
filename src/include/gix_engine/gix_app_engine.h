@@ -54,6 +54,9 @@ extern C {
     extern void gix_app_init(GixApp * app);
     void gix_app_set_window_fullscreen(GixApp * app);
     void gix_app_set_window_borderless(GixApp * app);
+    void gix_app_set_name(GixApp * app, const char* name);
+    void gix_app_set_window_size(GixApp * app, int width, int height);
+    void gix_app_set_window_position(GixApp * app, int x, int y);
     void gix_app_set_loading_scene(GixApp * app, GixScene * scene);
     SDL_AppResult gix_app_set_scene(GixApp * app, GixScene * scene);
     SDL_Window* gix_app_get_window(GixApp * app);

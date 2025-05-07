@@ -182,6 +182,18 @@ void gix_app_set_window_borderless(GixApp* app) {
     SDL_SetWindowBordered(app->window, false);
 }
 
+void gix_app_set_name(GixApp* app, const char* name) {
+    SDL_SetWindowTitle(app->window, name);
+}
+
+void gix_app_set_window_size(GixApp* app, int width, int height) {
+    SDL_SetWindowSize(app->window, width, height);
+}
+
+void gix_app_set_window_position(GixApp* app, int x, int y) {
+    SDL_SetWindowPosition(app->window, x, y);
+}
+
 void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
     gix_info("Set loading scene to GixApp");
 
@@ -204,11 +216,11 @@ SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene) {
     return SDL_APP_CONTINUE;
 }
 
- SDL_Window* gix_app_get_window(GixApp* app) {
+SDL_Window* gix_app_get_window(GixApp* app) {
     return app->window;
 }
 
- SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app) {
+SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app) {
     return app->device;
 }
 
