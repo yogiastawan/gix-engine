@@ -4,7 +4,7 @@ mkdir -p ${DST}/DXIL
 
 for filename in $SRC/*.vert.hlsl; do
     if [ -f "$filename" ]; then
-        echo "Compile file: ${filename}"
+        echo -e "\e[94mCompile file: \e[94m${filename}\e[0m"
         BASE_NAME=$(basename ${filename})
         $COMPILER "$filename" -o "${DST}/SPIRV/${BASE_NAME/.hlsl/.spv}"
         $COMPILER "$filename" -o "${DST}/MSL/${BASE_NAME/.hlsl/.msl}"
@@ -14,7 +14,7 @@ done
 
 for filename in $SRC/*.frag.hlsl; do
     if [ -f "$filename" ]; then
-        echo "Compile file: ${filename}"
+        echo -e "\e[94mCompile file: \e[94m${filename}\e[0m"
         BASE_NAME=$(basename ${filename})
         $COMPILER "$filename" -o "${DST}/SPIRV/${BASE_NAME/.hlsl/.spv}"
         $COMPILER "$filename" -o "${DST}/MSL/${BASE_NAME/.hlsl/.msl}"
@@ -24,7 +24,7 @@ done
 
 for filename in $SRC/*.comp.hlsl; do
     if [ -f "$filename" ]; then
-        echo "Compile file: ${filename}"
+        echo -e "\e[94mCompile file: \e[94m${filename}\e[0m"
         BASE_NAME=$(basename ${filename})
         $COMPILER "$filename" -o "${DST}/SPIRV/${BASE_NAME/.hlsl/.spv}"
         $COMPILER "$filename" -o "${DST}/MSL/${BASE_NAME/.hlsl/.msl}"
