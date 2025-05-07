@@ -64,6 +64,7 @@ SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
 
     return SDL_APP_CONTINUE;
 }
+
 SDL_AppResult SDL_AppIterate(void* app_state) {
     GixApp* app = (GixApp*)app_state;
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
@@ -92,6 +93,7 @@ void SDL_AppQuit(void* app_state, SDL_AppResult result) {
 
 // #endif
 
+// private function
 GixScene* gix_scene_new(GixApp* app) {
     gix_info("Create new GixScene");
 
@@ -106,7 +108,7 @@ GixScene* gix_scene_new(GixApp* app) {
 }
 
 // TODO! implement load scene from file protobuf
-GixScene* gix_scene_from_file(GixApp* app) {
+GixScene* gix_scene_from_file(GixApp* app, const char* file_path) {
     gix_info("Create new GixScene");
 
     GixScene* scene = SDL_malloc(sizeof(GixScene));
@@ -123,13 +125,6 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
     scene->scene_quit = quit_func;
 }
 
-Uint8 gix_scene_graphic_pipeline_size(const GixScene* scene) {
-    return scene->numb_graphic_pipeline;
-}
-
-Uint8 gix_scene_compute_pipeline_size(const GixScene* scene) {
-    return scene->numb_compute_pipeline;
-}
 void gix_scene_destroy(GixScene* scene) {
     gix_info("Destroy GixScene");
 
@@ -178,8 +173,8 @@ void gix_app_set_window_fullscreen(GixApp* app) {
     SDL_SetWindowFullscreen(app->window, true);
 }
 
-void gix_app_set_window_borderless(GixApp* app) {
-    SDL_SetWindowBordered(app->window, false);
+void gix_app_set_window_borderless(GixApp* app, bool borderless) {
+    SDL_SetWindowBordered(app->window, borderless);
 }
 
 void gix_app_set_name(GixApp* app, const char* name) {
@@ -224,6 +219,7 @@ SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app) {
     return app->device;
 }
 
+// private function
 void gix_app_destroy(GixApp* app) {
     gix_info("Destroy GixApp");
 
