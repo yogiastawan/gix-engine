@@ -42,19 +42,12 @@ static bool basic_triangle_init(GixScene *self) {
     return true;
 }
 
-static bool basic_triangle_update(GixScene *self, const SDL_Event *event) {
+static void scene_event(GixScene *self, const SDL_Event *event) {
     // Handle event here
-    self->compute_pipeline = NULL;
-    switch (event->gbutton.button) {
-        case SDL_GAMEPAD_BUTTON_BACK:
-            /* code */
-            break;
+}
 
-        default:
-            break;
-    }
-
-    return true;
+static void basic_triangle_update(GixScene *self, Uint64 delta_time) {
+    // Handle event here
 }
 static void basic_triangle_draw(GixScene *self) {
     // Draw frame here
@@ -89,7 +82,7 @@ static void basic_triangle_quit(GixScene *self) {
 }
 GixScene *create_scene(GixApp *app) {
     GixScene *scene = gix_scene_new(app);
-    gix_scene_impl(scene, basic_triangle_init, basic_triangle_update, basic_triangle_draw, basic_triangle_quit);
+    gix_scene_impl(scene, basic_triangle_init, scene_event, basic_triangle_update, basic_triangle_draw, basic_triangle_quit);
 
     return scene;
 }

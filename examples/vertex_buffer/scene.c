@@ -133,7 +133,8 @@ static bool vertex_buffer_scene_init(GixScene* self) {
     SDL_ReleaseGPUTransferBuffer(self->app->device, transfer_buffer);
     return true;
 }
-static bool vertex_buffer_scene_update(GixScene* self, const SDL_Event* event) {
+
+static void scene_event(GixScene* self, const SDL_Event* event) {
     // Handle event here
     self->compute_pipeline = NULL;
     switch (event->gbutton.button) {
@@ -144,8 +145,11 @@ static bool vertex_buffer_scene_update(GixScene* self, const SDL_Event* event) {
         default:
             break;
     }
+}
+static void vertex_buffer_scene_update(GixScene* self, Uint64 delta_time) {
 
-    return true;
+
+    
 }
 
 static void vertex_buffer_scene_draw(GixScene* self) {
@@ -186,7 +190,7 @@ static void vertex_buffer_scene_quit(GixScene* self) {
 }
 GixScene* create_scene(GixApp* app) {
     GixScene* scene = gix_scene_new(app);
-    gix_scene_impl(scene, vertex_buffer_scene_init, vertex_buffer_scene_update, vertex_buffer_scene_draw, vertex_buffer_scene_quit);
+    gix_scene_impl(scene, vertex_buffer_scene_init,scene_event, vertex_buffer_scene_update, vertex_buffer_scene_draw, vertex_buffer_scene_quit);
 
     return scene;
 }

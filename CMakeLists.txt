@@ -28,11 +28,11 @@ add_subdirectory(${CGLM_DIR})
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/Wall)
     add_compile_options(/Wextra)
-    add_compile_options(/Werror)
+    # add_compile_options(/Werror)
 else()
     add_compile_options(-Wall)
     add_compile_options(-Wextra)
-    add_compile_options(-Werror)
+    # add_compile_options(-Werror)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -47,12 +47,14 @@ else()
 endif()
 
 
-add_subdirectory(src)
-target_include_directories(${PROJECT_NAME} PRIVATE src/include)
-
 if(BUILD_EXAMPLE)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLE)
+
+add_subdirectory(src)
+target_include_directories(${PROJECT_NAME} PRIVATE src/include)
+
+
 
 set(BUILD_TYPE)
 

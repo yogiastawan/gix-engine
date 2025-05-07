@@ -8,7 +8,8 @@ extern C {
 #endif
 
 #define gix_scene_init(scene) scene->scene_init(scene)
-#define gix_scene_update(scene, event) scene->scene_update(scene, event)
+#define gix_scene_event(scene, event) scene->scene_event(scene, event)
+#define gix_scene_update(scene, delta_time) scene->scene_update(scene, delta_time)
 #define gix_scene_draw(scene) scene->scene_draw(scene)
 #define gix_scene_quit(scene) scene->scene_quit(scene)
 
@@ -18,7 +19,8 @@ extern C {
     typedef struct _GixApp GixApp;
 
     typedef bool (*SceneInit)(GixScene* self);
-    typedef bool (*SceneUpdate)(GixScene* self, const SDL_Event* event);
+    typedef void (*SceneEvent)(GixScene* self, const SDL_Event* event);
+    typedef void (*SceneUpdate)(GixScene* self, Uint64 delta_time);
     typedef void (*SceneDraw)(GixScene* self);
     typedef void (*SceneQuit)(GixScene* self);
 
@@ -36,6 +38,7 @@ extern C {
 
         // impl
         SceneInit scene_init;
+        SceneEvent scene_event;
         SceneUpdate scene_update;
         SceneDraw scene_draw;
         SceneQuit scene_quit;
@@ -43,7 +46,7 @@ extern C {
 
     GixScene* gix_scene_new(GixApp * app);
     GixScene* gix_scene_from_file(GixApp * app);
-    void gix_scene_impl(GixScene * scene, SceneInit init_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func);
+    void gix_scene_impl(GixScene * scene, SceneInit init_func, SceneEvent event_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func);
     Uint8 gix_scene_graphic_pipeline_size(const GixScene* scene);
     Uint8 gix_scene_compute_pipeline_size(const GixScene* scene);
     void gix_scene_destroy(GixScene * scene);
@@ -55,7 +58,12 @@ extern C {
         GixScene* current_scene;
 
         bool is_onload_scene;
+        Uint64 delta_time;
+        Uint64 last_tick;
+        Uint64 current_tick;
     };
+
+    extern void gix_app_init(GixApp * app);
 
     GixApp* gix_app_new(const char* name);
     void gix_app_set_loading_scene(GixApp * app, GixScene * scene);

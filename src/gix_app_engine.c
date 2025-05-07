@@ -1,4 +1,7 @@
-
+// #ifdef GIX_APP_MAIN
+#define SDL_MAIN_USE_CALLBACKS
+#include <SDL3/SDL_main.h>
+// #endif
 #include <gix_engine/gix_app_engine.h>
 #include <gix_engine/gix_checker.h>
 #include <gix_engine/gix_log.h>
@@ -8,6 +11,72 @@ static void gix_app_sdl_init() {
     gix_if_exit(!init_result, gix_log_error("Couldn't init SDL"));
     is_inited = true;
 }
+// #ifdef GIX_APP_MAIN
+
+// SDL CYCLE
+SDL_AppResult SDL_AppInit(void** app_state, int argc, char* argv[]) {
+    if (argc > 1) {
+        gix_info("%s", argv[1]);
+    }
+
+    GixApp* app = gix_app_new("GixApp");
+    app_state[0] = app;
+    gix_app_init(app);
+    SDL_ShowWindow(app->window);
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
+    GixApp* app = (GixApp*)app_state;
+    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+
+    app->current_tick = SDL_GetTicks();
+    app->delta_time = (app->current_tick - app->last_tick);
+    app->last_tick = app->current_tick;
+    switch (event->type) {
+        case SDL_EVENT_QUIT:
+            return SDL_APP_SUCCESS;
+            break;
+
+        default:
+            if (app->is_onload_scene && app->loading_scene) {
+                gix_scene_event(app->loading_scene, event);
+                return SDL_APP_CONTINUE;
+            }
+            gix_scene_event(app->current_scene, event);
+
+            break;
+    }
+
+    return SDL_APP_CONTINUE;
+}
+SDL_AppResult SDL_AppIterate(void* app_state) {
+    GixApp* app = (GixApp*)app_state;
+    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+
+    if (app->loading_scene) {
+        gix_scene_update(app->loading_scene, app->delta_time);
+        gix_scene_draw(app->loading_scene);
+        return SDL_APP_CONTINUE;
+    }
+    gix_scene_update(app->current_scene, app->delta_time);
+    gix_scene_draw(app->current_scene);
+    return SDL_APP_CONTINUE;
+}
+void SDL_AppQuit(void* app_state, SDL_AppResult result) {
+    if (result == SDL_APP_FAILURE) {
+        gix_log("App quit with error");
+    }
+
+    GixApp* app = (GixApp*)app_state;
+    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+
+    gix_app_destroy(app);
+}
+
+// END SDL CYCLE
+
+// #endif
 
 GixScene* gix_scene_new(GixApp* app) {
     gix_info("Create new GixScene");
@@ -31,9 +100,10 @@ GixScene* gix_scene_from_file(GixApp* app) {
     return scene;
 }
 
-void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func) {
-    gix_if_null_exit(scene, gix_log("Can not destroy of NULL GixScene"));
+void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func) {
+    gix_if_null_exit(scene, gix_log("Can impl of NULL GixScene"));
     scene->scene_init = init_func;
+    scene->scene_event = event_func;
     scene->scene_update = update_func;
     scene->scene_draw = draw_func;
     scene->scene_quit = quit_func;
@@ -108,45 +178,9 @@ void gix_app_set_scene(GixApp* app, GixScene* scene) {
 
     // TODO! Loading scene here
     app->is_onload_scene = true;
-    gix_scene_init(scene);
+    gix_if_exit(!gix_scene_init(scene), gix_log("GixScene init failed"));
     app->current_scene = scene;
     app->is_onload_scene = false;
-}
-
-void gix_app_run(GixApp* app) {
-    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
-
-    gix_if_exit(!app->loading_scene && !app->current_scene, gix_log("GixApp scene must not NULL"));
-
-    // show window
-    SDL_ShowWindow(app->window);
-
-    bool is_running = true;
-
-    SDL_Event event;
-
-    // main loop
-    while (is_running) {
-        // event loop
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_EVENT_QUIT:
-                    is_running = false;
-                    break;
-
-                default:
-                    break;
-            }
-
-            gix_scene_update(app->current_scene, &event);
-        }
-
-        if (app->is_onload_scene && app->loading_scene) {
-            gix_scene_draw(app->loading_scene);
-            continue;
-        }
-        gix_scene_draw(app->current_scene);
-    }
 }
 
 void gix_app_destroy(GixApp* app) {
