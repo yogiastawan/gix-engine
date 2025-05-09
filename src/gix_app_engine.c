@@ -15,7 +15,6 @@ struct _GixApp {
     bool is_onload_scene;
     Uint64 delta_time;
     Uint64 last_tick;
-    Uint64 current_tick;
 };
 
 static GixApp* gix_app_new(const char* name);
@@ -44,10 +43,7 @@ SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
     GixApp* app = (GixApp*)app_state;
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
 
-    app->current_tick = SDL_GetTicks();
-    app->delta_time = (app->current_tick - app->last_tick);
-    app->last_tick = app->current_tick;
-    switch (event->type) {
+        switch (event->type) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
             break;
@@ -68,6 +64,10 @@ SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
 SDL_AppResult SDL_AppIterate(void* app_state) {
     GixApp* app = (GixApp*)app_state;
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+
+    Uint64 current_tick = SDL_GetTicks();
+    app->delta_time = (current_tick - app->last_tick);
+    app->last_tick = current_tick;
 
     if (app->loading_scene) {
         gix_scene_update(app->loading_scene, app->delta_time);
