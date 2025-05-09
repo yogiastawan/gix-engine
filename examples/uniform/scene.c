@@ -1,6 +1,7 @@
 #include "scene.h"
 
 #include <cglm/cglm.h>
+#include <stdio.h>
 
 // buffer
 SDL_GPUBuffer* vertex_buffer;
@@ -16,8 +17,30 @@ MyVertex vertices_color[] = {
     {{0.5f, -0.5f, 0.0f}, {0, 0, 255, 255}},
 };
 
+float rotate_angle = 0.0;
+float rotate_speed = .10f;
+
+typedef struct _uniform {
+    mat4 mvp;
+} uniform;
+
+uniform uniform_data;
+static void update_uniform_data(Uint64 delta_time) {
+    mat4 model, view, projection;
+    glm_mat4_identity(model);
+    glm_mat4_identity(view);
+    glm_mat4_identity(projection);
+
+    rotate_angle += glm_rad(rotate_speed) * (float)delta_time;
+
+    glm_rotate(model, rotate_angle, (vec3){0.0f, 1.0f, 0.0f});
+    glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.001f, 1000.0f, projection);
+    glm_translate(view, (vec3){0.0f, 0.0f, -2.0f});
+    glm_mat4_mulN((mat4*[]){&projection, &view, &model}, 3, uniform_data.mvp);
+}
+
 static bool scene_init(GixScene* self) {
-    gix_info("Init vertex buffer scene");
+    gix_info("Init uniform scene");
 
     SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
     SDL_Window* window = gix_app_get_window(self->app);
@@ -26,9 +49,9 @@ static bool scene_init(GixScene* self) {
     self->numb_graphic_pipeline = 1;
 
     // load shader
-    SDL_GPUShader* vertex_shader = gix_load_shader(device, "./shader/SPIRV/vertex_buffer.vert.spv",
-                                                   SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, 0);
-    SDL_GPUShader* frag_shader = gix_load_shader(device, "./shader/SPIRV/vertex_buffer.frag.spv",
+    SDL_GPUShader* vertex_shader = gix_load_shader(device, "./shader/SPIRV/uniform.vert.spv",
+                                                   SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 0, 0);
+    SDL_GPUShader* frag_shader = gix_load_shader(device, "./shader/SPIRV/uniform.frag.spv",
                                                  SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
 
     //  pipeline color target description
@@ -139,10 +162,13 @@ static bool scene_init(GixScene* self) {
 
 static void scene_event(GixScene* self, const SDL_Event* event) {
     // Handle event here
-    self->compute_pipeline = NULL;
-    switch (event->gbutton.button) {
-        case SDL_GAMEPAD_BUTTON_BACK:
-            /* code */
+    switch (event->type) {
+        case SDL_EVENT_KEY_DOWN:
+            if (event->key.key == SDLK_UP) {
+                rotate_speed += 0.1f;
+            } else if (event->key.key == SDLK_DOWN) {
+                rotate_speed -= 0.1f;
+            }
             break;
 
         default:
@@ -150,6 +176,7 @@ static void scene_event(GixScene* self, const SDL_Event* event) {
     }
 }
 static void scene_update(GixScene* self, Uint64 delta_time) {
+    update_uniform_data(delta_time);
 }
 
 static void scene_draw(GixScene* self) {
@@ -167,7 +194,6 @@ static void scene_draw(GixScene* self) {
         colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
 
         SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(cmd_buffer, &colorTargetInfo, 1, NULL);
-
         // bind pipeline
         SDL_BindGPUGraphicsPipeline(renderPass, self->graphic_pipeline[0]);
         // bind vertex buffer
@@ -176,6 +202,10 @@ static void scene_draw(GixScene* self) {
             .offset = 0,
         }};
         SDL_BindGPUVertexBuffers(renderPass, 0, buffer_binding, 1);
+
+        // push uniform data
+        SDL_PushGPUVertexUniformData(cmd_buffer, 0, &uniform_data, sizeof(uniform));
+
         // draw
         SDL_DrawGPUPrimitives(renderPass, 3, 1, 0, 0);
         SDL_EndGPURenderPass(renderPass);
@@ -184,7 +214,7 @@ static void scene_draw(GixScene* self) {
     SDL_SubmitGPUCommandBuffer(cmd_buffer);
 }
 static void vertex_buffer_scene_quit(GixScene* self) {
-    gix_info("Quit vertex buffer scene");
+    gix_info("Quit uniform scene");
     // Deinit scene here
     SDL_ReleaseGPUBuffer(gix_app_get_gpu_device(self->app), vertex_buffer);
     self->numb_compute_pipeline = 0;

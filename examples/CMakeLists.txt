@@ -1,6 +1,8 @@
 project(examples)
 include_directories(../src/include)
 
+
+
 if(NOT DEFINED SDL_SHADER_CROSS)
     set(SDL_SHADER_CROSS /home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross)
 endif()
@@ -38,3 +40,13 @@ add_custom_target(compile_shader_index_vertex_buffer
     ALL
     COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/index_vertex_buffer/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
 add_dependencies(index_vertex_buffer compile_shader_index_vertex_buffer)
+
+#example for gix-engine with uniform buffer
+add_executable(uniform uniform/main.c
+    uniform/scene.c
+)
+target_link_libraries(uniform gix-engine)
+add_custom_target(compile_shader_uniform
+    ALL
+    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/uniform/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
+add_dependencies(uniform compile_shader_uniform)
