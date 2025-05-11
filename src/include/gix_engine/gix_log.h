@@ -4,7 +4,7 @@
 #include <SDL3/SDL.h>
 
 #ifdef __cpluplus
-extern C {
+extern "C" {
 #endif
 
 #ifdef BUILD_DEBUG

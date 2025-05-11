@@ -4,7 +4,7 @@
 #include <SDL3/SDL.h>
 
 #ifdef __cplusplus
-extern C {
+extern "C" {
 #endif
 
 #define gix_scene_init(scene) scene->scene_init(scene)

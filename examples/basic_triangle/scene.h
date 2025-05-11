@@ -4,7 +4,7 @@
 #include <gix_engine/gix_engine.h>
 
 #ifdef __cplusplus
-extern C {
+extern "C" {
 #endif
 
     GixScene *create_scene(GixApp * app);

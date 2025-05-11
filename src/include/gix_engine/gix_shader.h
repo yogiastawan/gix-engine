@@ -5,7 +5,7 @@
 #include <gix_engine/gix_app_engine.h>
 
 #ifdef __cpluplus
-extern C {
+extern "C" {
 #endif
 
     SDL_GPUShader* gix_load_shader(SDL_GPUDevice * device,

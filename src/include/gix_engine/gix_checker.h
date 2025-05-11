@@ -2,7 +2,7 @@
 #define __GIX_CHECKER_H__
 
 #ifdef __cpluplus
-extern C {
+extern "C" {
 #endif
 
 #ifdef BUILD_DEBUG
