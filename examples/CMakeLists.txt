@@ -50,3 +50,13 @@ add_custom_target(compile_shader_uniform
     ALL
     COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/uniform/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
 add_dependencies(uniform compile_shader_uniform)
+
+#example for gix-engine with drawobjects
+add_executable(drawobjects drawobjects/main.c
+    drawobjects/scene.c
+)
+target_link_libraries(drawobjects gix-engine)
+add_custom_target(compile_shader_drawobjects
+    ALL
+    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/drawobjects/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
+add_dependencies(drawobjects compile_shader_drawobjects)
