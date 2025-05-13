@@ -43,7 +43,7 @@ SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
     GixApp* app = (GixApp*)app_state;
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
 
-        switch (event->type) {
+    switch (event->type) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
             break;
@@ -165,6 +165,9 @@ GixApp* gix_app_new(const char* name) {
 
     app->loading_scene = NULL;
     app->current_scene = NULL;
+    app->is_onload_scene = false;
+    app->delta_time = 0;
+    app->last_tick = 0;
 
     return app;
 }
