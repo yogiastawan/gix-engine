@@ -39,8 +39,8 @@ static void update_uniform_data(Uint64 delta_time) {
     glm_mat4_mulN((mat4*[]){&projection, &view, &model}, 3, uniform_data.mvp);
 }
 
-static bool scene_init(GixScene* self) {
-    gix_info("Init uniform scene");
+static SDL_AppResult scene_init(GixScene* self) {
+    gix_info("Init uniform scene: %p", self);
 
     SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
     SDL_Window* window = gix_app_get_window(self->app);
@@ -54,6 +54,8 @@ static bool scene_init(GixScene* self) {
     SDL_GPUShader* frag_shader = gix_load_shader(device, "./shader/SPIRV/uniform.frag.spv",
                                                  SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
 
+    gix_info("vertex_shader: %p, frag_shader: %p", vertex_shader, frag_shader);
+    gix_info("graphic_pipeline ptr: %p", self->graphic_pipeline);
     //  pipeline color target description
     SDL_GPUColorTargetDescription color_target_desc[] = {
         (SDL_GPUColorTargetDescription){
@@ -157,10 +159,10 @@ static bool scene_init(GixScene* self) {
 
     // release transfer buffer
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
-    return true;
+    return SDL_APP_CONTINUE;
 }
 
-static void scene_event(GixScene* self, const SDL_Event* event) {
+static SDL_AppResult scene_event(GixScene* self, const SDL_Event* event) {
     // Handle event here
     switch (event->type) {
         case SDL_EVENT_KEY_DOWN:
@@ -168,18 +170,23 @@ static void scene_event(GixScene* self, const SDL_Event* event) {
                 rotate_speed += 0.1f;
             } else if (event->key.key == SDLK_DOWN) {
                 rotate_speed -= 0.1f;
+            } else if (event->key.key == SDLK_ESCAPE) {
+                return SDL_APP_SUCCESS;
             }
             break;
 
         default:
             break;
     }
+
+    return SDL_APP_CONTINUE;
 }
-static void scene_update(GixScene* self, Uint64 delta_time) {
+static SDL_AppResult scene_update(GixScene* self, Uint64 delta_time) {
     update_uniform_data(delta_time);
+    return SDL_APP_CONTINUE;
 }
 
-static void scene_draw(GixScene* self) {
+static SDL_AppResult scene_draw(GixScene* self) {
     // Draw frame here
     SDL_GPUCommandBuffer* cmd_buffer = SDL_AcquireGPUCommandBuffer(gix_app_get_gpu_device(self->app));
     if (!cmd_buffer) {
@@ -212,6 +219,8 @@ static void scene_draw(GixScene* self) {
     }
 
     SDL_SubmitGPUCommandBuffer(cmd_buffer);
+
+    return SDL_APP_CONTINUE;
 }
 static void vertex_buffer_scene_quit(GixScene* self) {
     gix_info("Quit uniform scene");

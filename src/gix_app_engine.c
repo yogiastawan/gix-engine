@@ -50,15 +50,11 @@ SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
 
         default:
             if (app->is_onload_scene && app->loading_scene) {
-                gix_scene_event(app->loading_scene, event);
-                return SDL_APP_CONTINUE;
+                return gix_scene_event(app->loading_scene, event);
             }
-            gix_scene_event(app->current_scene, event);
-
+            return gix_scene_event(app->current_scene, event);
             break;
     }
-
-    return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult SDL_AppIterate(void* app_state) {
@@ -70,13 +66,19 @@ SDL_AppResult SDL_AppIterate(void* app_state) {
     app->last_tick = current_tick;
 
     if (app->loading_scene) {
-        gix_scene_update(app->loading_scene, app->delta_time);
-        gix_scene_draw(app->loading_scene);
-        return SDL_APP_CONTINUE;
+        SDL_AppResult update_result = gix_scene_update(app->loading_scene, app->delta_time);
+        SDL_AppResult draw_result = gix_scene_draw(app->loading_scene);
+        // return SDL_APP_CONTINUE=0 when continue
+        // return SDL_APP_SUCCESS=1 when success and quit
+        // return SDL_APP_FAILURE=2 when failed
+        return update_result | draw_result;
     }
-    gix_scene_update(app->current_scene, app->delta_time);
-    gix_scene_draw(app->current_scene);
-    return SDL_APP_CONTINUE;
+    SDL_AppResult update_result = gix_scene_update(app->current_scene, app->delta_time);
+    SDL_AppResult draw_result = gix_scene_draw(app->current_scene);
+    // return SDL_APP_CONTINUE=0 when continue
+    // return SDL_APP_SUCCESS=1 when success
+    // return SDL_APP_FAILURE=2 when failed
+    return update_result | draw_result;
 }
 void SDL_AppQuit(void* app_state, SDL_AppResult result) {
     if (result == SDL_APP_FAILURE) {
@@ -212,11 +214,15 @@ SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene) {
     gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
 
     // TODO! Loading scene here
+    // set is_onload_scene to true
     app->is_onload_scene = true;
-    gix_if_return(!gix_scene_init(scene), gix_log("GixScene init failed"), SDL_APP_FAILURE);
+    // init scene
+    SDL_AppResult result = gix_scene_init(scene);
+    // set scene to current scene
     app->current_scene = scene;
+    // set is_onload_scene to false
     app->is_onload_scene = false;
-    return SDL_APP_CONTINUE;
+    return result;
 }
 
 SDL_Window* gix_app_get_window(GixApp* app) {

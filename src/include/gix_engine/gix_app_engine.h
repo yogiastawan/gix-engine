@@ -22,10 +22,10 @@ extern "C" {
     ///* GixApp is a singleton class, you can only create one instance of it.
     typedef struct _GixApp GixApp;
 
-    typedef bool (*SceneInit)(GixScene* self);
-    typedef void (*SceneEvent)(GixScene* self, const SDL_Event* event);
-    typedef void (*SceneUpdate)(GixScene* self, Uint64 delta_time);
-    typedef void (*SceneDraw)(GixScene* self);
+    typedef SDL_AppResult (*SceneInit)(GixScene* self);
+    typedef SDL_AppResult (*SceneEvent)(GixScene* self, const SDL_Event* event);
+    typedef SDL_AppResult (*SceneUpdate)(GixScene* self, Uint64 delta_time);
+    typedef SDL_AppResult (*SceneDraw)(GixScene* self);
     typedef void (*SceneQuit)(GixScene* self);
 
     struct _GixScene {

@@ -50,7 +50,7 @@ static void update_uniform_data(Uint64 delta_time) {
     glm_mat4_mulN((mat4 *[]){&projection, &view, &model}, 3, uniform_data.mvp);
 }
 
-static bool scene_init(GixScene *self) {
+static SDL_AppResult scene_init(GixScene *self) {
     gix_info("Init scene");
     // Init scene here
 
@@ -153,7 +153,7 @@ static bool scene_init(GixScene *self) {
     SDL_memcpy(transfer_data, vertices_color, sizeof(MyVertex) * 4);
 
     // Uint16 *transfer_index_data = (Uint16 *)(&transfer_data[4]);
-    Uint16 *transfer_index_data = (Uint16 *)((Uint8*)transfer_data + sizeof(MyVertex) * 4);
+    Uint16 *transfer_index_data = (Uint16 *)((Uint8 *)transfer_data + sizeof(MyVertex) * 4);
     SDL_memcpy(transfer_index_data, indices, sizeof(Uint16) * 6);
     // unmap transfer buffer
     SDL_UnmapGPUTransferBuffer(device, transfer_buffer);
@@ -192,16 +192,18 @@ static bool scene_init(GixScene *self) {
     // 10. Release transfer buffer
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
 
-    return true;
+    return SDL_APP_CONTINUE;
 }
-static void scene_event(GixScene *self, const SDL_Event *event) {
+static SDL_AppResult scene_event(GixScene *self, const SDL_Event *event) {
     // Handle event here
+    return SDL_APP_CONTINUE;
 }
-static void scene_update(GixScene *self, Uint64 delta_time) {
+static SDL_AppResult scene_update(GixScene *self, Uint64 delta_time) {
     // Handle event here
     update_uniform_data(delta_time);
+    return SDL_APP_CONTINUE;
 }
-static void scene_draw(GixScene *self) {
+static SDL_AppResult scene_draw(GixScene *self) {
     // Draw frame here
     SDL_GPUCommandBuffer *cmd_buffer = SDL_AcquireGPUCommandBuffer(gix_app_get_gpu_device(self->app));
     if (!cmd_buffer) {
@@ -236,7 +238,7 @@ static void scene_draw(GixScene *self) {
 
         // pus uniform data
         SDL_PushGPUVertexUniformData(cmd_buffer, 0, &uniform_data, sizeof(uniform));
-        
+
         // draw
         // SDL_DrawGPUPrimitives(render_pass, 3, 1, 0, 0);
         SDL_DrawGPUIndexedPrimitives(render_pass, 6, 1, 0, 0, 0);
@@ -244,6 +246,8 @@ static void scene_draw(GixScene *self) {
         SDL_EndGPURenderPass(render_pass);
     }
     SDL_SubmitGPUCommandBuffer(cmd_buffer);
+
+    return SDL_APP_CONTINUE;
 }
 static void scene_quit(GixScene *self) {
     // Handle quit here

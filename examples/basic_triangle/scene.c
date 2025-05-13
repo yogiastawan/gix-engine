@@ -2,7 +2,7 @@
 
 // static SDL_GPUViewport viewport = {160, 120, 320, 240, 0.1f, 1.0f};
 
-static bool basic_triangle_init(GixScene *self) {
+static SDL_AppResult basic_triangle_init(GixScene *self) {
     gix_info("Init basic triangle");
     // Init scene here
 
@@ -42,17 +42,19 @@ static bool basic_triangle_init(GixScene *self) {
     SDL_ReleaseGPUShader(device, vertex_shader);
     SDL_ReleaseGPUShader(device, frag_shader);
 
-    return true;
+    return SDL_APP_CONTINUE;
 }
 
-static void scene_event(GixScene *self, const SDL_Event *event) {
+static SDL_AppResult scene_event(GixScene *self, const SDL_Event *event) {
     // Handle event here
+    return SDL_APP_CONTINUE;
 }
 
-static void basic_triangle_update(GixScene *self, Uint64 delta_time) {
+static SDL_AppResult basic_triangle_update(GixScene *self, Uint64 delta_time) {
     // Handle event here
+    return SDL_APP_CONTINUE;
 }
-static void basic_triangle_draw(GixScene *self) {
+static SDL_AppResult basic_triangle_draw(GixScene *self) {
     // Draw frame here
     SDL_GPUCommandBuffer *cmd_buffer = SDL_AcquireGPUCommandBuffer(gix_app_get_gpu_device(self->app));
     if (!cmd_buffer) {
@@ -77,6 +79,7 @@ static void basic_triangle_draw(GixScene *self) {
     }
 
     SDL_SubmitGPUCommandBuffer(cmd_buffer);
+    return SDL_APP_CONTINUE;
 }
 static void basic_triangle_quit(GixScene *self) {
     gix_info("Quit basic triangle");

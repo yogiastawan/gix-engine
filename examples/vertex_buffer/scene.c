@@ -16,7 +16,7 @@ MyVertex vertices_color[] = {
     {{0.5f, -0.5f, 0.0f}, {0, 0, 255, 255}},
 };
 
-static bool scene_init(GixScene* self) {
+static SDL_AppResult scene_init(GixScene* self) {
     gix_info("Init vertex buffer scene");
 
     SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
@@ -134,10 +134,10 @@ static bool scene_init(GixScene* self) {
 
     // release transfer buffer
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
-    return true;
+    return SDL_APP_CONTINUE;
 }
 
-static void scene_event(GixScene* self, const SDL_Event* event) {
+static SDL_AppResult scene_event(GixScene* self, const SDL_Event* event) {
     // Handle event here
     self->compute_pipeline = NULL;
     switch (event->gbutton.button) {
@@ -148,11 +148,14 @@ static void scene_event(GixScene* self, const SDL_Event* event) {
         default:
             break;
     }
+
+    return SDL_APP_CONTINUE;
 }
-static void scene_update(GixScene* self, Uint64 delta_time) {
+static SDL_AppResult scene_update(GixScene* self, Uint64 delta_time) {
+    return SDL_APP_CONTINUE;
 }
 
-static void scene_draw(GixScene* self) {
+static SDL_AppResult scene_draw(GixScene* self) {
     // Draw frame here
     SDL_GPUCommandBuffer* cmd_buffer = SDL_AcquireGPUCommandBuffer(gix_app_get_gpu_device(self->app));
     if (!cmd_buffer) {
@@ -182,6 +185,8 @@ static void scene_draw(GixScene* self) {
     }
 
     SDL_SubmitGPUCommandBuffer(cmd_buffer);
+
+    return SDL_APP_CONTINUE;
 }
 static void vertex_buffer_scene_quit(GixScene* self) {
     gix_info("Quit vertex buffer scene");
