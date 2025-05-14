@@ -85,7 +85,7 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
  * @param scene GixScene pointer
  * @param numb Number of graphic pipeline. Value: 0-255
  */
-inline void gix_scene_alloc_graphic_pipeline(GixScene* scene, Uint8 numb) {
+static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene, Uint8 numb) {
     scene->numb_graphic_pipeline = numb;
     scene->graphic_pipeline = SDL_malloc(sizeof(void*) * numb);
 }
@@ -96,7 +96,7 @@ inline void gix_scene_alloc_graphic_pipeline(GixScene* scene, Uint8 numb) {
  * @param scene GixScene pointer
  * @param numb Number of compute pipeline. Value: 0-255
  */
-inline void gix_scene_alloc_compute_pipeline(GixScene* scene, Uint8 numb) {
+static inline void gix_scene_alloc_compute_pipeline(GixScene* scene, Uint8 numb) {
     scene->numb_compute_pipeline = numb;
     scene->compute_pipeline = SDL_malloc(sizeof(void*) * numb);
 }
