@@ -60,3 +60,12 @@ add_custom_target(compile_shader_drawobjects
     ALL
     COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/drawobjects/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
 add_dependencies(drawobjects compile_shader_drawobjects)
+
+#example for gix-engine with cube
+add_executable(cube cube/main.c
+    cube/scene.c)
+target_link_libraries(cube gix-engine)
+add_custom_target(compile_shader_cube
+    ALL
+    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/cube/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
+add_dependencies(cube compile_shader_cube)
