@@ -194,6 +194,8 @@ SDL_Window* gix_app_get_window(GixApp* app);
  */
 SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app);
 
+SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app);
+
 #ifdef __cplusplus
 }
 #endif

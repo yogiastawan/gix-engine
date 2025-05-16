@@ -233,6 +233,36 @@ SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app) {
     return app->device;
 }
 
+SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app) {
+    SDL_GPUTextureFormat format;
+    if (SDL_GPUTextureSupportsFormat(app->device,
+                                     SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
+                                     SDL_GPU_TEXTURETYPE_2D,
+                                     SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+        format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
+    } else if (SDL_GPUTextureSupportsFormat(app->device,
+                                            SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
+                                            SDL_GPU_TEXTURETYPE_2D,
+                                            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+        format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT;
+    } else if (SDL_GPUTextureSupportsFormat(app->device,
+                                            SDL_GPU_TEXTUREFORMAT_D24_UNORM,
+                                            SDL_GPU_TEXTURETYPE_2D,
+                                            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+        format = SDL_GPU_TEXTUREFORMAT_D24_UNORM;
+    } else if (SDL_GPUTextureSupportsFormat(app->device,
+                                            SDL_GPU_TEXTUREFORMAT_D24_UNORM_S8_UINT,
+                                            SDL_GPU_TEXTURETYPE_2D,
+                                            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+        format = SDL_GPU_TEXTUREFORMAT_D24_UNORM_S8_UINT;
+    } else {
+        format = SDL_GPU_TEXTUREFORMAT_D16_UNORM;
+    }
+
+    gix_info("Get depth texture format support: %u", format);
+    return format;
+}
+
 // private function
 void gix_app_destroy(GixApp* app) {
     gix_info("Destroy GixApp");

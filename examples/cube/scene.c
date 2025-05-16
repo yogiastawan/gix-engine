@@ -2,8 +2,6 @@
 
 #include <cglm/cglm.h>
 
-#define DEPTH_TEXTURE_FORMAT SDL_GPU_TEXTUREFORMAT_D32_FLOAT
-
 // vertex=>data per pixel
 typedef struct _Vertex {
     vec3 vertice;
@@ -114,8 +112,9 @@ scene_init(GixScene *self) {
     SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
 
     // create depth texture
+    SDL_GPUTextureFormat depth_format = gix_app_get_depth_texture_format(self->app);
     SDL_GPUTextureCreateInfo depth_texture_info = {
-        .format = DEPTH_TEXTURE_FORMAT,
+        .format = depth_format,
         .usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET,
         .height = 600,  // screen h
         .width = 800,   // screen w
@@ -178,7 +177,7 @@ scene_init(GixScene *self) {
                 .num_color_targets = 1,
                 .color_target_descriptions = color_target,
                 .has_depth_stencil_target = true,
-                .depth_stencil_format = DEPTH_TEXTURE_FORMAT,
+                .depth_stencil_format = depth_format,
             },
             .vertex_input_state = input_state,
             .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
