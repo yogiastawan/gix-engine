@@ -2,9 +2,7 @@ cbuffer MPV : register(b0, space1) {
     float4x4 mpv : packoffset(c0);
 };
 
-cbuffer ColorFace : register(b1, space1) {
-    float4 color[6];
-};
+StructuredBuffer<float4> color : register(t0, space0);
 
 struct VertexInput {
     float3 position : TEXCOORD0;
