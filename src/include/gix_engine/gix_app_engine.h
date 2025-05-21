@@ -29,15 +29,17 @@ typedef SDL_AppResult (*SceneDraw)(GixScene* self);
 typedef void (*SceneQuit)(GixScene* self);
 
 struct _GixScene {
-    // app bind
+    /// app bind
     GixApp* app;
 
-    // list of graphic pipline
+    /// list of graphic pipline
     SDL_GPUGraphicsPipeline** graphic_pipeline;
+    /// Number of graphics pipeline
     Uint8 numb_graphic_pipeline;
 
     // list of compute pipline
     SDL_GPUGraphicsPipeline** compute_pipeline;
+    /// Number of compute pipeline
     Uint8 numb_compute_pipeline;
 
     // implement function
@@ -46,6 +48,9 @@ struct _GixScene {
     SceneUpdate scene_update;
     SceneDraw scene_draw;
     SceneQuit scene_quit;
+
+    /// User Data
+    void* user_data;
 };
 
 /*SCENE PUBLIC FUNCTION*/

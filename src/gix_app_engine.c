@@ -105,6 +105,7 @@ GixScene* gix_scene_new(GixApp* app) {
     scene->numb_graphic_pipeline = 0;
     scene->compute_pipeline = NULL;
     scene->numb_compute_pipeline = 0;
+    scene->user_data = NULL;
 
     return scene;
 }
@@ -131,15 +132,19 @@ void gix_scene_destroy(GixScene* scene) {
     gix_info("Destroy GixScene");
 
     gix_if_null_exit(scene, gix_log("Can not destroy NULl of scene"));
+    // free user data
+    SDL_free(scene->user_data);
+    // free graphic pipelines
     for (Uint8 i = 0; i < scene->numb_graphic_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->graphic_pipeline[i]);
     }
-
+    // free compute pipeline
     for (Uint8 i = 0; i < scene->numb_compute_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->compute_pipeline[i]);
     }
-
+    // free list graphic pipeline
     SDL_free(scene->graphic_pipeline);
+    // free list compute pipeline
     SDL_free(scene->compute_pipeline);
 }
 
