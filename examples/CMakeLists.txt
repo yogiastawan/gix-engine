@@ -69,3 +69,12 @@ add_custom_target(compile_shader_cube
     ALL
     COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/cube/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
 add_dependencies(cube compile_shader_cube)
+
+#example for gix-engine with camera move
+add_executable(camera_move camera_move/main.c
+    camera_move/scene.c)
+target_link_libraries(camera_move gix-engine)
+add_custom_target(compile_shader_camera_move
+    ALL
+    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/camera_move/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
+add_dependencies(camera_move compile_shader_camera_move)
