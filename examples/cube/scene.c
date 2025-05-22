@@ -88,8 +88,6 @@ SDL_GPUBuffer *index_buffer;
 SDL_GPUBuffer *color_buffer;
 SDL_GPUTexture *depth_texture;
 
-bool is_color_pushed = false;
-
 static void update_uniform_data(Uint64 delta_time) {
     mat4 model, view, projection;
     glm_mat4_identity(model);

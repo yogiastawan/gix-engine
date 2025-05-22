@@ -160,13 +160,10 @@ static void update_mvp(Scene *scene, Uint64 delta_time) {
                       &(scene->model_view_projection.view),
                       &(scene->model_view_projection.model)},
                   3, scene->mvp);
-    // scene->camera_move[0] = 0.f;
-    // scene->camera_move[1] = 0.f;
 }
 
 static void keydown_handle(Scene *scene, SDL_Scancode key) {
     // get input
-    vec2 move_input = {0.f, 0.f};
     if (key == SDL_SCANCODE_DOWN) {
         scene->camera_move[1] = -1.f;
     }
