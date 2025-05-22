@@ -160,25 +160,34 @@ static void update_mvp(Scene *scene, Uint64 delta_time) {
                       &(scene->model_view_projection.view),
                       &(scene->model_view_projection.model)},
                   3, scene->mvp);
+    // scene->camera_move[0] = 0.f;
+    // scene->camera_move[1] = 0.f;
 }
 
 static void keydown_handle(Scene *scene, SDL_Scancode key) {
     // get input
     vec2 move_input = {0.f, 0.f};
     if (key == SDL_SCANCODE_DOWN) {
-        move_input[1] = -1.f;
+        scene->camera_move[1] = -1.f;
     }
     if (key == SDL_SCANCODE_UP) {
-        move_input[1] = 1.f;
+        scene->camera_move[1] = 1.f;
     }
     if (key == SDL_SCANCODE_RIGHT) {
-        move_input[0] = 1.f;
+        scene->camera_move[0] = 1.f;
     }
     if (key == SDL_SCANCODE_LEFT) {
-        move_input[0] = -1.f;
+        scene->camera_move[0] = -1.f;
     }
-    scene->camera_move[0] = move_input[0];
-    scene->camera_move[1] = move_input[1];
+}
+
+static void keyup_handle(Scene *scene, SDL_Scancode key) {
+    if (key == SDL_SCANCODE_DOWN || key == SDL_SCANCODE_UP) {
+        scene->camera_move[1] = 0.f;
+    }
+    if (key == SDL_SCANCODE_RIGHT || key == SDL_SCANCODE_LEFT) {
+        scene->camera_move[0] = 0.f;
+    }
 }
 
 static SDL_AppResult init(GixScene *self) {
@@ -360,21 +369,18 @@ static SDL_AppResult init(GixScene *self) {
 }
 static SDL_AppResult event_handler(GixScene *self, const SDL_Event *event) {
     switch (event->type) {
-        case SDL_EVENT_KEY_DOWN:
-            /* code */
-            {
-                if (event->key.scancode == SDL_SCANCODE_ESCAPE) {
-                    return SDL_APP_SUCCESS;
-                }
-                keydown_handle(self->user_data, event->key.scancode);
+        case SDL_EVENT_KEY_DOWN: {
+            if (event->key.scancode == SDL_SCANCODE_ESCAPE) {
+                return SDL_APP_SUCCESS;
             }
+            keydown_handle(self->user_data, event->key.scancode);
             break;
+        }
 
         case SDL_EVENT_KEY_UP: {
-            Scene *scene = self->user_data;
-            scene->camera_move[0] = 0.f;
-            scene->camera_move[1] = 0.f;
-        } break;
+            keyup_handle(self->user_data, event->key.scancode);
+            break;
+        }
         default:
             break;
     }
