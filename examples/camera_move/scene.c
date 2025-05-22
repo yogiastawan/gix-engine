@@ -6,6 +6,11 @@ typedef struct _MVP {
     mat4 model, view, projection;
 } MVP;
 
+typedef struct _Camera {
+    vec3 position;
+    vec3 target;
+} Camera;
+
 typedef struct _Scene {
     SDL_GPUBuffer *vertex_buffer;
     SDL_GPUBuffer *index_buffer;
@@ -23,6 +28,9 @@ typedef struct _Scene {
     // MVP
     MVP model_view_projection;
     mat4 mvp;
+    Camera camera;
+    float camera_speed;
+    vec2 camera_move;
 } Scene;
 
 static void scene_destroy(Scene *scene, SDL_GPUDevice *device) {
@@ -109,10 +117,41 @@ static void init_scene_data(Scene *scene) {
 
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.001f, 1000.0f, scene->model_view_projection.projection);
 
-    glm_translate(scene->model_view_projection.view, (vec3){0.0f, 0.0f, -5.f});
+    // glm_translate(scene->model_view_projection.view, (vec3){0.0f, 0.0f, -5.f});
+
+    glm_vec3_copy((vec3){0.f, 0.f, -10.f}, scene->camera.position);
+    glm_vec3_copy((vec3){0.f, 0.f, 0.f}, scene->camera.target);
+
+    scene->camera_speed = .0005f;
+    scene->camera_move[0] = 0.f;
+    scene->camera_move[1] = 0.f;
 }
 static void update_mvp(Scene *scene, Uint64 delta_time) {
     glm_mat4_identity(scene->model_view_projection.model);
+
+    // calculate direction
+    vec3 forward = {0.f, 0.f, 1.0f};
+    vec3 z_dir;
+    vec3 right;
+    glm_vec3_scale(forward, scene->camera_move[1], z_dir);
+    glm_vec3_scale((vec3){-1.0f, 0.f, 0.f}, scene->camera_move[0], right);
+    vec3 move_dir;
+    glm_vec3_add(z_dir, right, move_dir);
+    gix_info("move dir: [%f,%f,%f]", move_dir[0], move_dir[1], move_dir[2]);
+
+    // calculate motion
+    vec3 motion = {0.f, 0.f, 0.f};
+    glm_vec3_scale(move_dir, scene->camera_speed * (float)delta_time, motion);
+    gix_info("motion: [%f,%f,%f]", motion[0], motion[1], motion[2]);
+
+    // set camera position
+    glm_vec3_add(scene->camera.position, motion, scene->camera.position);
+    gix_info("camera->position: [%f,%f,%f]", scene->camera.position[0], scene->camera.position[1], scene->camera.position[2]);
+
+    // set camera target
+    glm_vec3_add(scene->camera.target, forward, scene->camera.target);
+
+    glm_lookat(scene->camera.position, scene->camera.target, (vec3){0.f, 1.f, 0.f}, scene->model_view_projection.view);
 
     scene->rotate_angle += glm_rad(scene->rotate_speed) * (float)delta_time;
     glm_rotate(scene->model_view_projection.model, scene->rotate_angle, (vec3){0.0f, 1.0f, 0.0f});
@@ -121,6 +160,25 @@ static void update_mvp(Scene *scene, Uint64 delta_time) {
                       &(scene->model_view_projection.view),
                       &(scene->model_view_projection.model)},
                   3, scene->mvp);
+}
+
+static void keydown_handle(Scene *scene, SDL_Scancode key) {
+    // get input
+    vec2 move_input = {0.f, 0.f};
+    if (key == SDL_SCANCODE_DOWN) {
+        move_input[1] = -1.f;
+    }
+    if (key == SDL_SCANCODE_UP) {
+        move_input[1] = 1.f;
+    }
+    if (key == SDL_SCANCODE_RIGHT) {
+        move_input[0] = 1.f;
+    }
+    if (key == SDL_SCANCODE_LEFT) {
+        move_input[0] = -1.f;
+    }
+    scene->camera_move[0] = move_input[0];
+    scene->camera_move[1] = move_input[1];
 }
 
 static SDL_AppResult init(GixScene *self) {
@@ -301,6 +359,25 @@ static SDL_AppResult init(GixScene *self) {
     return SDL_APP_CONTINUE;
 }
 static SDL_AppResult event_handler(GixScene *self, const SDL_Event *event) {
+    switch (event->type) {
+        case SDL_EVENT_KEY_DOWN:
+            /* code */
+            {
+                if (event->key.scancode == SDL_SCANCODE_ESCAPE) {
+                    return SDL_APP_SUCCESS;
+                }
+                keydown_handle(self->user_data, event->key.scancode);
+            }
+            break;
+
+        case SDL_EVENT_KEY_UP: {
+            Scene *scene = self->user_data;
+            scene->camera_move[0] = 0.f;
+            scene->camera_move[1] = 0.f;
+        } break;
+        default:
+            break;
+    }
     return SDL_APP_CONTINUE;
 }
 
