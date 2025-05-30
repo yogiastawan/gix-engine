@@ -104,7 +104,7 @@ static void update_uniform_data(Uint64 delta_time) {
 
 static SDL_AppResult
 scene_init(GixScene *self) {
-    gix_info("Init cube scene");
+    gix_log("Init cube scene");
 
     SDL_Window *window = gix_app_get_window(self->app);
     SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
@@ -347,7 +347,7 @@ static SDL_AppResult scene_draw(GixScene *self) {
 }
 
 static void scene_quit(GixScene *self) {
-    gix_info("Quit scene");
+    gix_log("Quit scene");
     SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
     SDL_ReleaseGPUBuffer(device, vertex_buffer);
     SDL_ReleaseGPUBuffer(device, index_buffer);

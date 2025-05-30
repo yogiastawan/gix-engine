@@ -2,7 +2,7 @@
 #include "scene.h"
 
 static SDL_AppResult clear_scene_init(GixScene *self) {
-    gix_info("Init clear scene");
+    gix_log("Init clear scene");
     // Init scene here
     self->compute_pipeline = NULL;
 
@@ -48,7 +48,7 @@ static SDL_AppResult clear_scene_draw(GixScene *self) {
     return SDL_APP_CONTINUE;
 }
 static void clear_scene_quit(GixScene *self) {
-    gix_info("Quit clear scene");
+    gix_log("Quit clear scene");
     // Deinit scene here
     self->numb_compute_pipeline = 0;
 }

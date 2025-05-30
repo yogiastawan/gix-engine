@@ -17,7 +17,7 @@ MyVertex vertices_color[] = {
 };
 
 static SDL_AppResult scene_init(GixScene* self) {
-    gix_info("Init vertex buffer scene");
+    gix_log("Init vertex buffer scene");
 
     SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
     SDL_Window* window = gix_app_get_window(self->app);
@@ -189,7 +189,7 @@ static SDL_AppResult scene_draw(GixScene* self) {
     return SDL_APP_CONTINUE;
 }
 static void vertex_buffer_scene_quit(GixScene* self) {
-    gix_info("Quit vertex buffer scene");
+    gix_log("Quit vertex buffer scene");
     // Deinit scene here
     SDL_ReleaseGPUBuffer(gix_app_get_gpu_device(self->app), vertex_buffer);
     self->numb_compute_pipeline = 0;

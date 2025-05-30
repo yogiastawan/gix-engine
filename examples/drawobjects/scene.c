@@ -55,7 +55,7 @@ static SDL_AppResult scene_init(GixScene* scene) {
     // This function should be implemented to set up the scene
     // For example, you might want to create graphics pipelines, load resources, etc.
 
-    gix_info("Init draw objects scene: %lu", sizeof(RectMono));
+    gix_log("Init draw objects scene: %lu", sizeof(RectMono));
 
     create_rects();
 

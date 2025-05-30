@@ -3,7 +3,7 @@
 // static SDL_GPUViewport viewport = {160, 120, 320, 240, 0.1f, 1.0f};
 
 static SDL_AppResult basic_triangle_init(GixScene *self) {
-    gix_info("Init basic triangle");
+    gix_log("Init basic triangle");
     // Init scene here
 
     SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
@@ -82,7 +82,7 @@ static SDL_AppResult basic_triangle_draw(GixScene *self) {
     return SDL_APP_CONTINUE;
 }
 static void basic_triangle_quit(GixScene *self) {
-    gix_info("Quit basic triangle");
+    gix_log("Quit basic triangle");
     // Deinit scene here
     self->numb_compute_pipeline = 0;
 }

@@ -40,7 +40,7 @@ static void update_uniform_data(Uint64 delta_time) {
 }
 
 static SDL_AppResult scene_init(GixScene* self) {
-    gix_info("Init uniform scene: %p", self);
+    gix_log("Init uniform scene: %p", self);
 
     SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
     SDL_Window* window = gix_app_get_window(self->app);
@@ -54,8 +54,8 @@ static SDL_AppResult scene_init(GixScene* self) {
     SDL_GPUShader* frag_shader = gix_load_shader(device, "./shader/SPIRV/uniform.frag.spv",
                                                  SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
 
-    gix_info("vertex_shader: %p, frag_shader: %p", vertex_shader, frag_shader);
-    gix_info("graphic_pipeline ptr: %p", self->graphic_pipeline);
+    gix_log("vertex_shader: %p, frag_shader: %p", vertex_shader, frag_shader);
+    gix_log("graphic_pipeline ptr: %p", self->graphic_pipeline);
     //  pipeline color target description
     SDL_GPUColorTargetDescription color_target_desc[] = {
         (SDL_GPUColorTargetDescription){
@@ -223,7 +223,7 @@ static SDL_AppResult scene_draw(GixScene* self) {
     return SDL_APP_CONTINUE;
 }
 static void vertex_buffer_scene_quit(GixScene* self) {
-    gix_info("Quit uniform scene");
+    gix_log("Quit uniform scene");
     // Deinit scene here
     SDL_ReleaseGPUBuffer(gix_app_get_gpu_device(self->app), vertex_buffer);
     self->numb_compute_pipeline = 0;

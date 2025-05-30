@@ -29,7 +29,7 @@ static void gix_app_sdl_init() {
 // SDL CYCLE
 SDL_AppResult SDL_AppInit(void** app_state, int argc, char* argv[]) {
     if (argc > 1) {
-        gix_info("%s", argv[1]);
+        gix_log("%s", argv[1]);
     }
 
     GixApp* app = gix_app_new("GixApp");
@@ -97,7 +97,7 @@ void SDL_AppQuit(void* app_state, SDL_AppResult result) {
 
 // private function
 GixScene* gix_scene_new(GixApp* app) {
-    gix_info("Create new GixScene");
+    gix_log("Create new GixScene");
 
     GixScene* scene = SDL_malloc(sizeof(GixScene));
     scene->app = app;
@@ -112,7 +112,7 @@ GixScene* gix_scene_new(GixApp* app) {
 
 // TODO! implement load scene from file protobuf
 GixScene* gix_scene_from_file(GixApp* app, const char* file_path) {
-    gix_info("Create new GixScene");
+    gix_log("Create new GixScene");
 
     GixScene* scene = SDL_malloc(sizeof(GixScene));
     scene->app = app;
@@ -129,7 +129,7 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
 }
 
 void gix_scene_destroy(GixScene* scene) {
-    gix_info("Destroy GixScene");
+    gix_log("Destroy GixScene");
 
     gix_if_null_exit(scene, gix_log("Can not destroy NULl of scene"));
     // free user data
@@ -149,7 +149,7 @@ void gix_scene_destroy(GixScene* scene) {
 }
 
 GixApp* gix_app_new(const char* name) {
-    gix_info("Create new GixApp");
+    gix_log("Create new GixApp");
 
     gix_if_null_exit(name, gix_log("Name GixApp shouldn't NULL"));
 
@@ -205,7 +205,7 @@ void gix_app_set_window_resizeable(GixApp* app, bool resizeable) {
 }
 
 void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
-    gix_info("Set loading scene to GixApp");
+    gix_log("Set loading scene to GixApp");
 
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
     gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
@@ -213,7 +213,7 @@ void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
 }
 
 SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene) {
-    gix_info("Set scene to GixApp");
+    gix_log("Set scene to GixApp");
 
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
     gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
@@ -264,13 +264,13 @@ SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app) {
         format = SDL_GPU_TEXTUREFORMAT_D16_UNORM;
     }
 
-    gix_info("Get depth texture format support: %u", format);
+    gix_log("Get depth texture format support: %u", format);
     return format;
 }
 
 // private function
 void gix_app_destroy(GixApp* app) {
-    gix_info("Destroy GixApp");
+    gix_log("Destroy GixApp");
 
     gix_if_null_exit(app, gix_log("Can not destroy of NULL GixApp"));
 
