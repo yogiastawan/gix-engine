@@ -2,6 +2,11 @@
 
 #include <cglm/cglm.h>
 
+#define LOOK_SENSITIVITY 0.5f
+
+#define YAW 0
+#define PITCH 1
+
 typedef struct _MVP {
     mat4 model, view, projection;
 } MVP;
@@ -30,7 +35,14 @@ typedef struct _Scene {
     mat4 mvp;
     Camera camera;
     float camera_speed;
-    vec2 camera_move;
+    bool is_camera_move_keyboard;
+    vec2 camera_move_keyboard;
+
+    vec2 mouse_move;
+
+    float look[2];
+    bool is_mouse_down;
+
 } Scene;
 
 static void scene_destroy(Scene *scene, SDL_GPUDevice *device) {
@@ -106,7 +118,7 @@ static void init_scene_data(Scene *scene) {
         {0.f, 0.f, 1.f, 1.f},  // back
         {1.f, 1.f, 0.f, 1.f},  // left
         {0.f, 1.f, 1.f, 1.f},  // bottom
-        {1.f, 0.f, 1.f, 1.f},  // top
+        {1.f, 1.f, 1.f, 1.f},  // top
 
     };
     SDL_memcpy(scene->cube_face_color, face_color, sizeof(face_color));
@@ -122,32 +134,73 @@ static void init_scene_data(Scene *scene) {
     glm_vec3_copy((vec3){0.f, 0.f, -10.f}, scene->camera.position);
     glm_vec3_copy((vec3){0.f, 0.f, 0.f}, scene->camera.target);
 
-    scene->camera_speed = .0005f;
-    scene->camera_move[0] = 0.f;
-    scene->camera_move[1] = 0.f;
+    scene->camera_speed = .005f;
+    scene->camera_move_keyboard[0] = 0.f;
+    scene->camera_move_keyboard[1] = 0.f;
+
+    scene->is_camera_move_keyboard = false;
+
+    scene->mouse_move[0] = 0.f;
+    scene->mouse_move[1] = 0.f;
+
+    scene->look[YAW] = 0.f;
+    scene->look[PITCH] = 0.f;
+
+    scene->is_mouse_down = false;
 }
+
+static float wrap_float(float value, float min, float max) {
+    float range = max - min;
+    float wrapped_value = fmodf(value - min, range);
+    if (wrapped_value < 0) {
+        wrapped_value += range;
+    }
+    return wrapped_value + min;
+}
+
 static void update_mvp(Scene *scene, Uint64 delta_time) {
     glm_mat4_identity(scene->model_view_projection.model);
 
+    // glm_vec2_scale(scene->look, LOOK_SENSITIVITY, scene->look);
+    scene->look[YAW] = wrap_float(scene->look[YAW] - scene->mouse_move[0] * LOOK_SENSITIVITY, -0.f, 360.f);
+    scene->look[PITCH] = glm_clamp(scene->look[PITCH] - scene->mouse_move[1] * LOOK_SENSITIVITY, -89.f, 89.f);
+
+    mat4 m = GLM_MAT4_IDENTITY_INIT;
+    glm_euler_xyz((vec3){glm_rad(scene->look[PITCH]), glm_rad(scene->look[YAW]), 0.f}, m);
+    mat3 m3 = GLM_MAT3_IDENTITY_INIT;
+    glm_mat4_pick3(m, m3);
     // calculate direction
     vec3 forward = {0.f, 0.f, 1.0f};
-    vec3 z_dir;
-    vec3 right;
-    glm_vec3_scale(forward, scene->camera_move[1], z_dir);
-    glm_vec3_scale((vec3){-1.0f, 0.f, 0.f}, scene->camera_move[0], right);
-    vec3 move_dir;
-    glm_vec3_add(z_dir, right, move_dir);
-    gix_info("move dir: [%f,%f,%f]", move_dir[0], move_dir[1], move_dir[2]);
+    glm_mat3_mulv(m3, forward, forward);
+    vec3 right = {-1.0f, 0.f, 0.f};
+    glm_mat3_mulv(m3, right, right);
 
-    // calculate motion
-    vec3 motion = {0.f, 0.f, 0.f};
-    glm_vec3_scale(move_dir, scene->camera_speed * (float)delta_time, motion);
-    gix_info("motion: [%f,%f,%f]", motion[0], motion[1], motion[2]);
+    if (scene->is_camera_move_keyboard) {
+        glm_vec3_scale(forward, scene->camera_move_keyboard[1], forward);
+        glm_vec3_scale(right, scene->camera_move_keyboard[0], right);
 
-    // set camera position
-    glm_vec3_add(scene->camera.position, motion, scene->camera.position);
-    gix_info("camera->position: [%f,%f,%f]", scene->camera.position[0], scene->camera.position[1], scene->camera.position[2]);
+        vec3 move_dir;
+        // glm_vec3_scale(forward, (float)scene->is_mouse_down, forward);
+        // glm_vec3_scale(right, (float)scene->is_mouse_down, right);
+        // if (scene->is_mouse_down || scene->is_camera_move_keyboard) {
+            glm_vec3_add(forward, right, move_dir);
+            glm_vec3_normalize(move_dir);
 
+            glm_vec3_print(move_dir, stdout);
+            glm_vec3_print(forward, stdout);
+            glm_vec3_print(right, stdout);
+            // move_dir[1] = 0.f;
+
+            // calculate motion
+            vec3 motion = {0.f, 0.f, 0.f};
+            glm_vec3_scale(move_dir, scene->camera_speed * (float)delta_time, motion);
+            // gix_info("motion: [%f,%f,%f]", motion[0], motion[1], motion[2]);
+
+            // set camera position
+            glm_vec3_add(scene->camera.position, motion, scene->camera.position);
+            // gix_info("camera->position: [%f,%f,%f]", scene->camera.position[0], scene->camera.position[1], scene->camera.position[2]);
+        // }
+    }
     // set camera target
     glm_vec3_add(scene->camera.target, forward, scene->camera.target);
 
@@ -165,30 +218,35 @@ static void update_mvp(Scene *scene, Uint64 delta_time) {
 static void keydown_handle(Scene *scene, SDL_Scancode key) {
     // get input
     if (key == SDL_SCANCODE_DOWN) {
-        scene->camera_move[1] = -1.f;
+        scene->camera_move_keyboard[1] = -1.f;
     }
     if (key == SDL_SCANCODE_UP) {
-        scene->camera_move[1] = 1.f;
+        scene->camera_move_keyboard[1] = 1.f;
     }
     if (key == SDL_SCANCODE_RIGHT) {
-        scene->camera_move[0] = 1.f;
+        scene->camera_move_keyboard[0] = 1.f;
     }
     if (key == SDL_SCANCODE_LEFT) {
-        scene->camera_move[0] = -1.f;
+        scene->camera_move_keyboard[0] = -1.f;
     }
 }
 
 static void keyup_handle(Scene *scene, SDL_Scancode key) {
     if (key == SDL_SCANCODE_DOWN || key == SDL_SCANCODE_UP) {
-        scene->camera_move[1] = 0.f;
+        scene->camera_move_keyboard[1] = 0.f;
     }
     if (key == SDL_SCANCODE_RIGHT || key == SDL_SCANCODE_LEFT) {
-        scene->camera_move[0] = 0.f;
+        scene->camera_move_keyboard[0] = 0.f;
     }
 }
 
+static void mouse_down(Scene *scene, const SDL_MouseMotionEvent *motion) {
+    gix_log("mouse down");
+    glm_vec2_add(scene->mouse_move, (vec2){motion->xrel, motion->yrel}, scene->mouse_move);
+}
+
 static SDL_AppResult init(GixScene *self) {
-    gix_info("Init Scene Camera Move");
+    gix_log("Init Scene Camera Move");
 
     // create user data
     self->user_data = SDL_malloc(sizeof(Scene));
@@ -370,12 +428,33 @@ static SDL_AppResult event_handler(GixScene *self, const SDL_Event *event) {
             if (event->key.scancode == SDL_SCANCODE_ESCAPE) {
                 return SDL_APP_SUCCESS;
             }
-            keydown_handle(self->user_data, event->key.scancode);
+            Scene *scene = self->user_data;
+            scene->is_camera_move_keyboard = true;
+            keydown_handle(scene, event->key.scancode);
             break;
         }
 
         case SDL_EVENT_KEY_UP: {
+            Scene *scene = self->user_data;
+            scene->is_camera_move_keyboard = false;
             keyup_handle(self->user_data, event->key.scancode);
+            break;
+        }
+
+        case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+            Scene *scene = self->user_data;
+            scene->is_mouse_down = true;
+            break;
+        }
+        case SDL_EVENT_MOUSE_BUTTON_UP: {
+            Scene *scene = self->user_data;
+            scene->is_mouse_down = false;
+            break;
+        }
+        case SDL_EVENT_MOUSE_MOTION: {
+            Scene *scene = self->user_data;
+            if (scene->is_mouse_down)
+                mouse_down(self->user_data, &event->motion);
             break;
         }
         default:
@@ -385,7 +464,10 @@ static SDL_AppResult event_handler(GixScene *self, const SDL_Event *event) {
 }
 
 static SDL_AppResult update(GixScene *self, Uint64 delta_time) {
-    update_mvp(self->user_data, delta_time);
+    Scene *user_data = self->user_data;
+    update_mvp(user_data, delta_time);
+    user_data->mouse_move[0] = 0.f;
+    user_data->mouse_move[1] = 0.f;
     return SDL_APP_CONTINUE;
 }
 
@@ -444,7 +526,7 @@ static SDL_AppResult draw(GixScene *self) {
 }
 
 static void quit(GixScene *self) {
-    gix_info("Quit scene camera move");
+    gix_log("Quit scene camera move");
     scene_destroy(self->user_data, gix_app_get_gpu_device(self->app));
 }
 
