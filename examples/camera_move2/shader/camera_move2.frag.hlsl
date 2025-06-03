@@ -1,9 +1,9 @@
 struct InputFrag {
-    float3 color : TEXCOORD0;
+    float4 color : TEXCOORD0;
 };
 
 struct OutPixel {
-    float3 color : SV_TARGET0;
+    float4 color : SV_TARGET0;
 };
 
 OutPixel main(InputFrag input) {
