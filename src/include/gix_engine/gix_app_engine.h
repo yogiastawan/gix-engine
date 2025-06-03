@@ -156,6 +156,15 @@ void gix_app_set_name(GixApp* app, const char* name);
 void gix_app_set_window_size(GixApp* app, int width, int height);
 
 /**
+ * @brief Get Window size of GixApp
+ *
+ * @param app GixApp pointer
+ * @param width Uint32 pointer to hold window width value
+ * @param height Uint32 pointer to hold window height value
+ */
+void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32* height);
+
+/**
  * @brief Set GixApp window position
  *
  * @param app GixApp pointer

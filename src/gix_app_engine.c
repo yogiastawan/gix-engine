@@ -12,9 +12,13 @@ struct _GixApp {
     GixScene* loading_scene;
     GixScene* current_scene;
 
-    bool is_onload_scene;
     Uint64 delta_time;
     Uint64 last_tick;
+
+    Uint32 window_width;
+    Uint32 window_height;
+
+    bool is_onload_scene;
 };
 
 static GixApp* gix_app_new(const char* name);
@@ -175,12 +179,14 @@ GixApp* gix_app_new(const char* name) {
     app->is_onload_scene = false;
     app->delta_time = 0;
     app->last_tick = 0;
+    SDL_GetWindowSize(app->window, &app->window_width, &app->window_height);
 
     return app;
 }
 
 void gix_app_set_window_fullscreen(GixApp* app) {
     SDL_SetWindowFullscreen(app->window, true);
+    SDL_GetWindowSize(app->window, &app->window_width, &app->window_height);
 }
 
 void gix_app_set_window_borderless(GixApp* app, bool borderless) {
@@ -189,6 +195,11 @@ void gix_app_set_window_borderless(GixApp* app, bool borderless) {
 
 void gix_app_set_name(GixApp* app, const char* name) {
     SDL_SetWindowTitle(app->window, name);
+}
+
+void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32 *height) {
+    *width = app->window_width;
+    *height = app->window_height;
 }
 
 void gix_app_set_window_size(GixApp* app, int width, int height) {
