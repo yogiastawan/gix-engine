@@ -508,9 +508,9 @@ static void init_my_scene(MyScene *scene) {
         float a = (float)SDL_rand(scene->w * 2);
         float x = (float)(a - scene->w) /
                   80.f;
-        float b = (float)SDL_rand(scene->w * 2);
+        float b = (float)SDL_rand(scene->h);
 
-        float y = (float)(b - scene->h) /
+        float y = (float)(b) /
                   60.f;
         gix_log("x: %f=>%f", a, x);
         gix_log("y: %f=>%f", b, y);
