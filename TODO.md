@@ -7,4 +7,6 @@
 - [x] batch rendering
 - [ ] use gltf
 - [x] Change GixScene function `event` and `update` to return SDL_AppResult
-- [x] Create camera movement
+- [ ] Create camera movement
+- [x] instancing rendering
+- [ ] use json for shader info
