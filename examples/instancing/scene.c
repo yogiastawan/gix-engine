@@ -56,8 +56,10 @@ typedef struct _MyScene {
 static void init_my_scene(MyScene *scene);
 
 static SDL_AppResult init(GixScene *self);
-static SDL_AppResult event(GixScene *self, const SDL_Event *event);
-static SDL_AppResult update(GixScene *self, Uint64 delta_time);
+static SDL_AppResult event(GixScene *self,
+                           const SDL_Event *event);
+static SDL_AppResult update(GixScene *self,
+                            Uint64 delta_time);
 static SDL_AppResult draw(GixScene *self);
 static void quit(GixScene *self);
 
@@ -89,25 +91,29 @@ SDL_AppResult init(GixScene *self) {
         .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
         .size = sizeof(CubeVertex) * scene->numb_cube_vertex,  // each cube contains 24 vertex
     };
-    scene->vertex_buffer = SDL_CreateGPUBuffer(device, &vertex_buffer_info);
+    scene->vertex_buffer = SDL_CreateGPUBuffer(device,
+                                               &vertex_buffer_info);
     // create index buffer
     SDL_GPUBufferCreateInfo index_bufrer_info = {
         .usage = SDL_GPU_BUFFERUSAGE_INDEX,
         .size = sizeof(Uint16) * scene->numb_indice,  // each cube contains 36 indices
     };
-    scene->index_buffer = SDL_CreateGPUBuffer(device, &index_bufrer_info);
+    scene->index_buffer = SDL_CreateGPUBuffer(device,
+                                              &index_bufrer_info);
     // create color buffer
     SDL_GPUBufferCreateInfo color_buffer_info = {
         .usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
         .size = sizeof(vec4) * scene->numb_face_color,
     };
-    scene->color_buffer = SDL_CreateGPUBuffer(device, &color_buffer_info);
+    scene->color_buffer = SDL_CreateGPUBuffer(device,
+                                              &color_buffer_info);
     // create model_matrix buffer
     SDL_GPUBufferCreateInfo model_mat_create_info = {
         .usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
         .size = sizeof(mat4) * NUMB_CUBE,
     };
-    scene->model_matrix_buffer = SDL_CreateGPUBuffer(device, &model_mat_create_info);
+    scene->model_matrix_buffer = SDL_CreateGPUBuffer(device,
+                                                     &model_mat_create_info);
 
     // create depth texture
     SDL_GPUTextureFormat depth_format =
@@ -267,7 +273,9 @@ SDL_AppResult init(GixScene *self) {
     SDL_EndGPUCopyPass(copy_pass);
 
     bool res = SDL_SubmitGPUCommandBuffer(upload_cmd);
-    gix_if_return(!res, gix_log_error("Couldn't submit upload cmd"), SDL_APP_FAILURE);
+    gix_if_return(!res,
+                  gix_log_error("Couldn't submit upload cmd"),
+                  SDL_APP_FAILURE);
     // release transfer buffer
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
 
