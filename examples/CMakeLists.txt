@@ -80,10 +80,10 @@ add_custom_target(compile_shader_camera_move
 add_dependencies(camera_move compile_shader_camera_move)
 
 #example for gix-engine with camera move
-add_executable(camera_move2 camera_move2/main.c
-    camera_move2/scene.c)
-target_link_libraries(camera_move2 gix-engine)
-add_custom_target(compile_shader_camera_move2
+add_executable(instancing instancing/main.c
+    instancing/scene.c)
+target_link_libraries(instancing gix-engine)
+add_custom_target(compile_shader_instancing
     ALL
-    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/camera_move2/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
-add_dependencies(camera_move2 compile_shader_camera_move2)
+    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/instancing/shader DST=${CMAKE_CURRENT_BINARY_DIR}/shader ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
+add_dependencies(instancing compile_shader_instancing)

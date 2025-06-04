@@ -70,7 +70,7 @@ GixScene *create_scene(GixApp *app) {
 }
 
 SDL_AppResult init(GixScene *self) {
-    gix_log("Init GixScene for Camera Move 2");
+    gix_log("Init GixScene for Instancing");
 
     SDL_Window *window = gix_app_get_window(self->app);
     SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
@@ -127,10 +127,10 @@ SDL_AppResult init(GixScene *self) {
     gix_scene_alloc_graphic_pipeline(self, 1);
     // load shader
     SDL_GPUShader *vertex_shader = gix_load_shader(
-        device, "./shader/SPIRV/camera_move2.vert.spv",
+        device, "./shader/SPIRV/instancing.vert.spv",
         SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 2, 0);
     SDL_GPUShader *frag_shader = gix_load_shader(
-        device, "./shader/SPIRV/camera_move2.frag.spv",
+        device, "./shader/SPIRV/instancing.frag.spv",
         SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
     // create color target description
     SDL_GPUColorTargetDescription color_target_desc[1] = {
