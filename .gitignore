@@ -1,3 +1,4 @@
 build
 libs/cglm-0.9.6
 libs/SDL3-3.2.10
+libs/json-c-0.18

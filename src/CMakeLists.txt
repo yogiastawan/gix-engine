@@ -7,6 +7,6 @@ set(srcs gix_app_engine.c
 
 
 add_library(${PROJECT_NAME} ${BUILD_TYPE} ${srcs})
-target_link_libraries(${PROJECT_NAME} SDL3::SDL3 cglm ${MATH})
+target_link_libraries(${PROJECT_NAME} SDL3::SDL3 cglm json-c ${MATH})
 
 
