@@ -15,9 +15,10 @@ static SDL_AppResult basic_triangle_init(GixScene *self) {
 
     // load shader
     SDL_GPUShader *vertex_shader = gix_load_shader(device, "./shader/SPIRV/basic_triangle.vert.spv",
-                                                   SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, 0);
+                                                   "./shader/SPIRV/basic_triangle.vert.json", SDL_GPU_SHADERSTAGE_VERTEX);
     SDL_GPUShader *frag_shader = gix_load_shader(device, "./shader/SPIRV/triangle_fill.frag.spv",
-                                                 SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
+                                                 "./shader/SPIRV/triangle_fill.frag.json",
+                                                 SDL_GPU_SHADERSTAGE_FRAGMENT);
 
     // create pipeline
     SDL_GPUColorTargetDescription color_target_desc[] = {

@@ -126,12 +126,14 @@ scene_init(GixScene *self) {
 
     // load shader
     SDL_GPUShader *vertex_shader = gix_load_shader(device,
-                                                   "./shader/SPIRV/cube.vert.spv", SDL_GPU_SHADERSTAGE_VERTEX,
-                                                   0, 1, 1, 0);
+                                                   "./shader/SPIRV/cube.vert.spv",
+                                                   "./shader/SPIRV/cube.vert.json",
+                                                   SDL_GPU_SHADERSTAGE_VERTEX);
 
     SDL_GPUShader *fragment_shader = gix_load_shader(device,
-                                                     "./shader/SPIRV/cube.frag.spv", SDL_GPU_SHADERSTAGE_FRAGMENT,
-                                                     0, 0, 0, 0);
+                                                     "./shader/SPIRV/cube.frag.spv",
+                                                     "./shader/SPIRV/cube.frag.json",
+                                                     SDL_GPU_SHADERSTAGE_FRAGMENT);
 
     // create pipeline
     SDL_GPUColorTargetDescription color_target[] = {

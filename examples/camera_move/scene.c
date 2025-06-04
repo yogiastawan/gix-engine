@@ -183,22 +183,22 @@ static void update_mvp(Scene *scene, Uint64 delta_time) {
         // glm_vec3_scale(forward, (float)scene->is_mouse_down, forward);
         // glm_vec3_scale(right, (float)scene->is_mouse_down, right);
         // if (scene->is_mouse_down || scene->is_camera_move_keyboard) {
-            glm_vec3_add(forward, right, move_dir);
-            glm_vec3_normalize(move_dir);
+        glm_vec3_add(forward, right, move_dir);
+        glm_vec3_normalize(move_dir);
 
-            glm_vec3_print(move_dir, stdout);
-            glm_vec3_print(forward, stdout);
-            glm_vec3_print(right, stdout);
-            // move_dir[1] = 0.f;
+        glm_vec3_print(move_dir, stdout);
+        glm_vec3_print(forward, stdout);
+        glm_vec3_print(right, stdout);
+        // move_dir[1] = 0.f;
 
-            // calculate motion
-            vec3 motion = {0.f, 0.f, 0.f};
-            glm_vec3_scale(move_dir, scene->camera_speed * (float)delta_time, motion);
-            // gix_info("motion: [%f,%f,%f]", motion[0], motion[1], motion[2]);
+        // calculate motion
+        vec3 motion = {0.f, 0.f, 0.f};
+        glm_vec3_scale(move_dir, scene->camera_speed * (float)delta_time, motion);
+        // gix_info("motion: [%f,%f,%f]", motion[0], motion[1], motion[2]);
 
-            // set camera position
-            glm_vec3_add(scene->camera.position, motion, scene->camera.position);
-            // gix_info("camera->position: [%f,%f,%f]", scene->camera.position[0], scene->camera.position[1], scene->camera.position[2]);
+        // set camera position
+        glm_vec3_add(scene->camera.position, motion, scene->camera.position);
+        // gix_info("camera->position: [%f,%f,%f]", scene->camera.position[0], scene->camera.position[1], scene->camera.position[2]);
         // }
     }
     // set camera target
@@ -273,12 +273,14 @@ static SDL_AppResult init(GixScene *self) {
 
     // load shader
     SDL_GPUShader *vertex_shader = gix_load_shader(device,
-                                                   "./shader/SPIRV/camera_move.vert.spv", SDL_GPU_SHADERSTAGE_VERTEX,
-                                                   0, 1, 1, 0);
+                                                   "./shader/SPIRV/camera_move.vert.spv",
+                                                   "./shader/SPIRV/camera_move.vert.json",
+                                                   SDL_GPU_SHADERSTAGE_VERTEX);
 
     SDL_GPUShader *fragment_shader = gix_load_shader(device,
-                                                     "./shader/SPIRV/camera_move.frag.spv", SDL_GPU_SHADERSTAGE_FRAGMENT,
-                                                     0, 0, 0, 0);
+                                                     "./shader/SPIRV/camera_move.frag.spv",
+                                                     "./shader/SPIRV/camera_move.frag.json",
+                                                     SDL_GPU_SHADERSTAGE_FRAGMENT);
 
     // create pipeline
     SDL_GPUColorTargetDescription color_target[] = {

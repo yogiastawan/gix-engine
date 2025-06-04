@@ -26,10 +26,14 @@ static SDL_AppResult scene_init(GixScene* self) {
     self->numb_graphic_pipeline = 1;
 
     // load shader
-    SDL_GPUShader* vertex_shader = gix_load_shader(device, "./shader/SPIRV/vertex_buffer.vert.spv",
-                                                   SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 0, 0);
-    SDL_GPUShader* frag_shader = gix_load_shader(device, "./shader/SPIRV/vertex_buffer.frag.spv",
-                                                 SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
+    SDL_GPUShader* vertex_shader = gix_load_shader(device,
+                                                   "./shader/SPIRV/vertex_buffer.vert.spv",
+                                                   "./shader/SPIRV/vertex_buffer.vert.json",
+                                                   SDL_GPU_SHADERSTAGE_VERTEX);
+    SDL_GPUShader* frag_shader = gix_load_shader(device,
+                                                 "./shader/SPIRV/vertex_buffer.frag.spv",
+                                                 "./shader/SPIRV/vertex_buffer.frag.json",
+                                                 SDL_GPU_SHADERSTAGE_FRAGMENT);
 
     //  pipeline color target description
     SDL_GPUColorTargetDescription color_target_desc[] = {

@@ -49,10 +49,14 @@ static SDL_AppResult scene_init(GixScene* self) {
     self->numb_graphic_pipeline = 1;
 
     // load shader
-    SDL_GPUShader* vertex_shader = gix_load_shader(device, "./shader/SPIRV/uniform.vert.spv",
-                                                   SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 0, 0);
-    SDL_GPUShader* frag_shader = gix_load_shader(device, "./shader/SPIRV/uniform.frag.spv",
-                                                 SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, 0);
+    SDL_GPUShader* vertex_shader = gix_load_shader(device,
+                                                   "./shader/SPIRV/uniform.vert.spv",
+                                                   "./shader/SPIRV/uniform.vert.json",
+                                                   SDL_GPU_SHADERSTAGE_VERTEX);
+    SDL_GPUShader* frag_shader = gix_load_shader(device,
+                                                 "./shader/SPIRV/uniform.frag.spv",
+                                                 "./shader/SPIRV/uniform.frag.json",
+                                                 SDL_GPU_SHADERSTAGE_FRAGMENT);
 
     gix_log("vertex_shader: %p, frag_shader: %p", vertex_shader, frag_shader);
     gix_log("graphic_pipeline ptr: %p", self->graphic_pipeline);
