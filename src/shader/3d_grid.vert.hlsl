@@ -22,6 +22,15 @@ struct VertOutput
     float4 color : TEXCOORD0;
 };
 
+float4x4 translate(float3 tr)
+{
+    return float4x4(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        tr.x, tr.y, tr.z, 1);
+}
+
 VertOutput main(VertexInput input, uint vert_id : SV_VertexID, uint instance_id : SV_InstanceID)
 {
     VertOutput output;
@@ -51,6 +60,11 @@ VertOutput main(VertexInput input, uint vert_id : SV_VertexID, uint instance_id 
     float current_vertex_x = lerp(start_x, end_x, (float)vert_id % 2) + offset;
     float current_vertex_z = lerp(start_z, end_z, (float)vert_id % 2) + offset;
 
-    output.position = float4(current_vertex_x, 0.f, current_vertex_z, 1.0f);
+    float3 tr = lerp(float3(offset, 0, 0), float3(0, 0, offset), blend_factor);
+    float4x4 model_matrix = translate(tr);
+
+    float4 world_pos = mul(model_matrix, float4(current_vertex_x, 0, current_vertex_z, 1));
+    // clip position
+    output.position = mul(vp, world_pos);
     return output;
 }
