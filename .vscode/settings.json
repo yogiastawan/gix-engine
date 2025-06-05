@@ -36,5 +36,8 @@
         "typeinfo": "c",
         "variant": "c",
         "vector": "c"
-    }
+    },
+    "editor.rulers": [
+        80
+    ]
 }

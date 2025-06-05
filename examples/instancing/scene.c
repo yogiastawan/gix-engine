@@ -56,10 +56,8 @@ typedef struct _MyScene {
 static void init_my_scene(MyScene *scene);
 
 static SDL_AppResult init(GixScene *self);
-static SDL_AppResult event(GixScene *self,
-                           const SDL_Event *event);
-static SDL_AppResult update(GixScene *self,
-                            Uint64 delta_time);
+static SDL_AppResult event(GixScene *self, const SDL_Event *event);
+static SDL_AppResult update(GixScene *self, Uint64 delta_time);
 static SDL_AppResult draw(GixScene *self);
 static void quit(GixScene *self);
 
@@ -89,31 +87,30 @@ SDL_AppResult init(GixScene *self) {
     // create vertex buffer
     SDL_GPUBufferCreateInfo vertex_buffer_info = {
         .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
-        .size = sizeof(CubeVertex) * scene->numb_cube_vertex,  // each cube contains 24 vertex
+        .size = sizeof(CubeVertex) *
+                scene->numb_cube_vertex,  // each cube contains 24 vertex
     };
-    scene->vertex_buffer = SDL_CreateGPUBuffer(device,
-                                               &vertex_buffer_info);
+    scene->vertex_buffer = SDL_CreateGPUBuffer(device, &vertex_buffer_info);
     // create index buffer
     SDL_GPUBufferCreateInfo index_bufrer_info = {
         .usage = SDL_GPU_BUFFERUSAGE_INDEX,
-        .size = sizeof(Uint16) * scene->numb_indice,  // each cube contains 36 indices
+        .size = sizeof(Uint16) *
+                scene->numb_indice,  // each cube contains 36 indices
     };
-    scene->index_buffer = SDL_CreateGPUBuffer(device,
-                                              &index_bufrer_info);
+    scene->index_buffer = SDL_CreateGPUBuffer(device, &index_bufrer_info);
     // create color buffer
     SDL_GPUBufferCreateInfo color_buffer_info = {
         .usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
         .size = sizeof(vec4) * scene->numb_face_color,
     };
-    scene->color_buffer = SDL_CreateGPUBuffer(device,
-                                              &color_buffer_info);
+    scene->color_buffer = SDL_CreateGPUBuffer(device, &color_buffer_info);
     // create model_matrix buffer
     SDL_GPUBufferCreateInfo model_mat_create_info = {
         .usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
         .size = sizeof(mat4) * NUMB_CUBE,
     };
-    scene->model_matrix_buffer = SDL_CreateGPUBuffer(device,
-                                                     &model_mat_create_info);
+    scene->model_matrix_buffer =
+        SDL_CreateGPUBuffer(device, &model_mat_create_info);
 
     // create depth texture
     SDL_GPUTextureFormat depth_format =
@@ -126,20 +123,17 @@ SDL_AppResult init(GixScene *self) {
         .layer_count_or_depth = 1,
         .num_levels = 1,
     };
-    scene->depth_texture =
-        SDL_CreateGPUTexture(device, &depth_texture_info);
+    scene->depth_texture = SDL_CreateGPUTexture(device, &depth_texture_info);
 
     // setup pipe line
     gix_scene_alloc_graphic_pipeline(self, 1);
     // load shader
-    SDL_GPUShader *vertex_shader = gix_load_shader(device,
-                                                   "./shader/SPIRV/instancing.vert.spv",
-                                                   "./shader/SPIRV/instancing.vert.json",
-                                                   SDL_GPU_SHADERSTAGE_VERTEX);
-    SDL_GPUShader *frag_shader = gix_load_shader(device,
-                                                 "./shader/SPIRV/instancing.frag.spv",
-                                                 "./shader/SPIRV/instancing.frag.json",
-                                                 SDL_GPU_SHADERSTAGE_FRAGMENT);
+    SDL_GPUShader *vertex_shader = gix_load_shader(
+        device, "./shader/SPIRV/instancing.vert.spv",
+        "./shader/SPIRV/instancing.vert.json", SDL_GPU_SHADERSTAGE_VERTEX);
+    SDL_GPUShader *frag_shader = gix_load_shader(
+        device, "./shader/SPIRV/instancing.frag.spv",
+        "./shader/SPIRV/instancing.frag.json", SDL_GPU_SHADERSTAGE_FRAGMENT);
     // create color target description
     SDL_GPUColorTargetDescription color_target_desc[1] = {
         (SDL_GPUColorTargetDescription){
@@ -186,12 +180,13 @@ SDL_AppResult init(GixScene *self) {
 
     // create grphic pipeline
     SDL_GPUGraphicsPipelineCreateInfo pipeline_info = {
-        .target_info = {
-            .num_color_targets = 1,
-            .color_target_descriptions = color_target_desc,
-            .has_depth_stencil_target = true,
-            .depth_stencil_format = depth_format,
-        },
+        .target_info =
+            {
+                .num_color_targets = 1,
+                .color_target_descriptions = color_target_desc,
+                .has_depth_stencil_target = true,
+                .depth_stencil_format = depth_format,
+            },
         .vertex_input_state = vertex_input_state,
         .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
         .vertex_shader = vertex_shader,
@@ -232,20 +227,17 @@ SDL_AppResult init(GixScene *self) {
     // copy indice
     SDL_memcpy((Uint8 *)transfer_address +
                    (sizeof(CubeVertex) * scene->numb_cube_vertex),
-               scene->indice_vertex,
-               sizeof(Uint16) * scene->numb_indice);
+               scene->indice_vertex, sizeof(Uint16) * scene->numb_indice);
     // copy face color
     SDL_memcpy((Uint8 *)transfer_address +
                    (sizeof(CubeVertex) * scene->numb_cube_vertex) +
                    (sizeof(Uint16) * scene->numb_indice),
-               scene->face_colors,
-               sizeof(vec4) * scene->numb_face_color);
+               scene->face_colors, sizeof(vec4) * scene->numb_face_color);
     // unmap
     SDL_UnmapGPUTransferBuffer(device, transfer_buffer);
 
     // Upload buffer data
-    SDL_GPUCommandBuffer *upload_cmd =
-        SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUCommandBuffer *upload_cmd = SDL_AcquireGPUCommandBuffer(device);
     SDL_GPUCopyPass *copy_pass = SDL_BeginGPUCopyPass(upload_cmd);
     // upload vertex
     SDL_GPUTransferBufferLocation src = {
@@ -275,8 +267,7 @@ SDL_AppResult init(GixScene *self) {
     SDL_EndGPUCopyPass(copy_pass);
 
     bool res = SDL_SubmitGPUCommandBuffer(upload_cmd);
-    gix_if_return(!res,
-                  gix_log_error("Couldn't submit upload cmd"),
+    gix_if_return(!res, gix_log_error("Couldn't submit upload cmd"),
                   SDL_APP_FAILURE);
     // release transfer buffer
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
@@ -309,21 +300,15 @@ SDL_AppResult draw(GixScene *self) {
     SDL_GPUCommandBuffer *cmd = SDL_AcquireGPUCommandBuffer(device);
 
     SDL_GPUTexture *swapchain_texture;
-    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd,
-                                              window,
-                                              &swapchain_texture,
+    if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd, window, &swapchain_texture,
                                               NULL, NULL)) {
         // map model matrix transfer buffer
-        mat4 *transfer_address =
-            SDL_MapGPUTransferBuffer(device,
-                                     scene->model_matrix_transfer_buffer,
-                                     true);
+        mat4 *transfer_address = SDL_MapGPUTransferBuffer(
+            device, scene->model_matrix_transfer_buffer, true);
 
-        SDL_memcpy(transfer_address,
-                   scene->model_matrix,
+        SDL_memcpy(transfer_address, scene->model_matrix,
                    sizeof(mat4) * NUMB_CUBE);
-        SDL_UnmapGPUTransferBuffer(device,
-                                   scene->model_matrix_transfer_buffer);
+        SDL_UnmapGPUTransferBuffer(device, scene->model_matrix_transfer_buffer);
 
         // upload to gpu
         SDL_GPUCopyPass *copy_pass = SDL_BeginGPUCopyPass(cmd);
@@ -343,8 +328,7 @@ SDL_AppResult draw(GixScene *self) {
 
         // create render pass
         SDL_GPUColorTargetInfo color_target_info = {0};
-        color_target_info.clear_color =
-            (SDL_FColor){0.3f, 0.4f, 0.5f, 1.f};
+        color_target_info.clear_color = (SDL_FColor){0.3f, 0.4f, 0.5f, 1.f};
         color_target_info.texture = swapchain_texture;
         color_target_info.load_op = SDL_GPU_LOADOP_CLEAR;
         color_target_info.store_op = SDL_GPU_STOREOP_STORE;
@@ -355,11 +339,9 @@ SDL_AppResult draw(GixScene *self) {
         depth_target_info.load_op = SDL_GPU_LOADOP_CLEAR;
         depth_target_info.store_op = SDL_GPU_STOREOP_DONT_CARE;
 
-        SDL_GPURenderPass *render_pass =
-            SDL_BeginGPURenderPass(cmd, &color_target_info, 1,
-                                   &depth_target_info);
-        SDL_BindGPUGraphicsPipeline(render_pass,
-                                    self->graphic_pipeline[0]);
+        SDL_GPURenderPass *render_pass = SDL_BeginGPURenderPass(
+            cmd, &color_target_info, 1, &depth_target_info);
+        SDL_BindGPUGraphicsPipeline(render_pass, self->graphic_pipeline[0]);
         // bind vertex buffer
         SDL_GPUBufferBinding vertex_buffer_binding[1] = {
             {
@@ -368,32 +350,27 @@ SDL_AppResult draw(GixScene *self) {
             },
         };
 
-        SDL_BindGPUVertexBuffers(render_pass, 0,
-                                 vertex_buffer_binding, 1);
+        SDL_BindGPUVertexBuffers(render_pass, 0, vertex_buffer_binding, 1);
         // bind index buffer
         SDL_GPUBufferBinding index_buffer_binding = {
             .buffer = scene->index_buffer,
             .offset = 0,
         };
-        SDL_BindGPUIndexBuffer(render_pass,
-                               &index_buffer_binding,
+        SDL_BindGPUIndexBuffer(render_pass, &index_buffer_binding,
                                SDL_GPU_INDEXELEMENTSIZE_16BIT);
         // bind vertex storage buffer
         SDL_GPUBuffer *vertex_storage_buffer[2] = {
             scene->color_buffer,
             scene->model_matrix_buffer,
         };
-        SDL_BindGPUVertexStorageBuffers(render_pass,
-                                        0,
-                                        vertex_storage_buffer, 2);
+        SDL_BindGPUVertexStorageBuffers(render_pass, 0, vertex_storage_buffer,
+                                        2);
         // push uniform
-        SDL_PushGPUVertexUniformData(cmd, 0, &(scene->view_proj),
-                                     sizeof(mat4));
+        SDL_PushGPUVertexUniformData(cmd, 0, scene->view_proj, sizeof(mat4));
 
         // draw
-        SDL_DrawGPUIndexedPrimitives(render_pass,
-                                     scene->numb_indice,
-                                     NUMB_CUBE, 0, 0, 0);
+        SDL_DrawGPUIndexedPrimitives(render_pass, scene->numb_indice, NUMB_CUBE,
+                                     0, 0, 0);
 
         SDL_EndGPURenderPass(render_pass);
     }
@@ -410,8 +387,7 @@ void quit(GixScene *self) {
     SDL_ReleaseGPUBuffer(device, scene->color_buffer);
     SDL_ReleaseGPUBuffer(device, scene->model_matrix_buffer);
     SDL_ReleaseGPUTexture(device, scene->depth_texture);
-    SDL_ReleaseGPUTransferBuffer(device,
-                                 scene->model_matrix_transfer_buffer);
+    SDL_ReleaseGPUTransferBuffer(device, scene->model_matrix_transfer_buffer);
 }
 
 static void init_my_scene(MyScene *scene) {
@@ -452,30 +428,26 @@ static void init_my_scene(MyScene *scene) {
     };
     scene->cube_vertex =
         SDL_malloc(sizeof(CubeVertex) * scene->numb_cube_vertex);
-    SDL_memcpy(scene->cube_vertex,
-               cube_vertex,
+    SDL_memcpy(scene->cube_vertex, cube_vertex,
                sizeof(CubeVertex) * scene->numb_cube_vertex);
 
     // set numb_indice;
     scene->numb_indice = 36;
     // set *indice_vertex;
-    Uint16 index_vertex_cube[36] = {
-        // front (z = -0.5)
-        0, 1, 2, 0, 2, 3,
-        // right (x = 0.5)
-        4, 5, 6, 4, 6, 7,
-        // back (z = 0.5)
-        8, 11, 10, 8, 10, 9,
-        // left (x = -0.5)
-        12, 13, 14, 12, 14, 15,
-        // bottom (y = -0.5)
-        16, 17, 18, 16, 18, 19,
-        // top (y = 0.5)
-        20, 23, 22, 20, 22, 21};
-    scene->indice_vertex = SDL_malloc(sizeof(Uint16) *
-                                      scene->numb_indice);
-    SDL_memcpy(scene->indice_vertex,
-               index_vertex_cube,
+    Uint16 index_vertex_cube[36] = {// front (z = -0.5)
+                                    0, 1, 2, 0, 2, 3,
+                                    // right (x = 0.5)
+                                    4, 5, 6, 4, 6, 7,
+                                    // back (z = 0.5)
+                                    8, 11, 10, 8, 10, 9,
+                                    // left (x = -0.5)
+                                    12, 13, 14, 12, 14, 15,
+                                    // bottom (y = -0.5)
+                                    16, 17, 18, 16, 18, 19,
+                                    // top (y = 0.5)
+                                    20, 23, 22, 20, 22, 21};
+    scene->indice_vertex = SDL_malloc(sizeof(Uint16) * scene->numb_indice);
+    SDL_memcpy(scene->indice_vertex, index_vertex_cube,
                sizeof(Uint16) * scene->numb_indice);
 
     // set numb_face_color;
@@ -489,23 +461,19 @@ static void init_my_scene(MyScene *scene) {
         {0.f, 1.f, 1.f, 1.f},  // bottom
         {1.f, 0.f, 1.f, 1.f},  // top
     };
-    scene->face_colors =
-        SDL_malloc(sizeof(vec4) * scene->numb_face_color);
+    scene->face_colors = SDL_malloc(sizeof(vec4) * scene->numb_face_color);
     SDL_memcpy(scene->face_colors, color,
                sizeof(vec4) * scene->numb_face_color);
 
     // set camera
-    glm_vec3_copy((vec3){0.f, 0.f, 25.f},
-                  scene->camera.position);
-    glm_vec3_copy((vec3){0.f, 0.f, 0.f},
-                  scene->camera.target);
+    glm_vec3_copy((vec3){0.f, 0.f, 25.f}, scene->camera.position);
+    glm_vec3_copy((vec3){0.f, 0.f, 0.f}, scene->camera.target);
     // set vp;
     mat4 init = GLM_MAT4_IDENTITY_INIT;
     glm_mat4_copy(init, scene->vp.view);
     glm_mat4_copy(init, scene->vp.projection);
-    glm_perspective(glm_rad(45.0f),
-                    (float)scene->w / (float)scene->h,
-                    0.001f, 1000.0f, scene->vp.projection);
+    glm_perspective(glm_rad(45.0f), (float)scene->w / (float)scene->h, 0.001f,
+                    1000.0f, scene->vp.projection);
 
     // set rotate angle
     scene->rotate_angle = 0.0f;
@@ -516,12 +484,10 @@ static void init_my_scene(MyScene *scene) {
     for (Uint16 i = 0; i < NUMB_CUBE; i++) {
         glm_mat4_copy(init, scene->model_matrix[i]);
         float a = (float)SDL_rand(scene->w * 2);
-        float x = (float)(a - scene->w) /
-                  80.f;
+        float x = (float)(a - scene->w) / 80.f;
         float b = (float)SDL_rand(scene->h);
 
-        float y = (float)(b) /
-                  60.f;
+        float y = (float)(b) / 60.f;
         gix_log("x: %f=>%f", a, x);
         gix_log("y: %f=>%f", b, y);
         vec3 pos = {
@@ -536,25 +502,19 @@ static void init_my_scene(MyScene *scene) {
     }
 }
 
-static void update_model_matrix(MyScene *scene,
-                                Uint64 delta_time) {
-    glm_lookat(scene->camera.position,
-               scene->camera.target,
-               (vec3){0.f, 1.f, 0.f},
-               scene->vp.view);
+static void update_model_matrix(MyScene *scene, Uint64 delta_time) {
+    glm_lookat(scene->camera.position, scene->camera.target,
+               (vec3){0.f, 1.f, 0.f}, scene->vp.view);
     // glm_translate(scene->vp.view, (vec3){0.0f, 0.0f, -5.0f});
 
-    glm_mat4_mulN((mat4 *[]){&(scene->vp.projection),
-                             &(scene->vp.view)},
-                  2, scene->view_proj);
+    glm_mat4_mulN((mat4 *[]){&(scene->vp.projection), &(scene->vp.view)}, 2,
+                  scene->view_proj);
 
-    scene->rotate_angle = glm_rad(scene->rotate_speed) *
-                          (float)delta_time;
+    scene->rotate_angle = glm_rad(scene->rotate_speed) * (float)delta_time;
 
     for (Uint16 i = 0; i < NUMB_CUBE; i++) {
         if (scene->is_rotate[i]) {
-            glm_rotate(scene->model_matrix[i],
-                       scene->rotate_angle,
+            glm_rotate(scene->model_matrix[i], scene->rotate_angle,
                        (vec3){0.0f, 1.0f, 0.0f});
         }
     }

@@ -5,6 +5,10 @@
 #include <gix_engine/gix_app_engine.h>
 #include <gix_engine/gix_checker.h>
 #include <gix_engine/gix_log.h>
+#include <gix_engine/gix_shader.h>
+
+#undef __internal_gix_scene_setup_3d_grid
+#undef __insternal_gix_scene_draw_3d_grid
 
 struct _GixApp {
     SDL_Window* window;
@@ -20,6 +24,31 @@ struct _GixApp {
 
     bool is_onload_scene;
 };
+
+#ifdef BUILD_DEBUG
+struct _GixSceneDebugPrivate {
+    SDL_GPUBuffer* vertex_grid_3d_buffer;
+    SDL_GPUBuffer* line_grid_3d_buffer;
+    SDL_GPUGraphicsPipeline* grid_3d_pipeLine;
+    Uint32 numb_grid;
+    bool is_grid_3d_inited;
+};
+typedef struct _VertexGrid3DLine {
+    Uint8 color[4];
+} VertexGrid3DLine;
+
+#define NUM_GRID_3D_VERTEX 1  // only 1 color
+#define NUM_3D_DATA 2         // for x and z
+typedef struct _Line3DData {
+    float start_end[2];
+    uint increment;
+} Line3DData;
+
+#define INTR_SHADER_VERTEX ""
+#define INTR_SHADER_FRAG ""
+#define INTR_SHADER_VERTEX_JSON ""
+#define INTR_SHADER_FRAG_JSON ""
+#endif
 
 static GixApp* gix_app_new(const char* name);
 static void gix_app_destroy(GixApp* app);
@@ -48,16 +77,18 @@ SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
 
     switch (event->type) {
-        case SDL_EVENT_QUIT:
+        case SDL_EVENT_QUIT: {
             return SDL_APP_SUCCESS;
             break;
+        }
 
-        default:
+        default: {
             if (app->is_onload_scene && app->loading_scene) {
                 return gix_scene_event(app->loading_scene, event);
             }
             return gix_scene_event(app->current_scene, event);
             break;
+        }
     }
 }
 
@@ -70,14 +101,16 @@ SDL_AppResult SDL_AppIterate(void* app_state) {
     app->last_tick = current_tick;
 
     if (app->loading_scene) {
-        SDL_AppResult update_result = gix_scene_update(app->loading_scene, app->delta_time);
+        SDL_AppResult update_result =
+            gix_scene_update(app->loading_scene, app->delta_time);
         SDL_AppResult draw_result = gix_scene_draw(app->loading_scene);
         // return SDL_APP_CONTINUE=0 when continue
         // return SDL_APP_SUCCESS=1 when success and quit
         // return SDL_APP_FAILURE=2 when failed
         return update_result | draw_result;
     }
-    SDL_AppResult update_result = gix_scene_update(app->current_scene, app->delta_time);
+    SDL_AppResult update_result =
+        gix_scene_update(app->current_scene, app->delta_time);
     SDL_AppResult draw_result = gix_scene_draw(app->current_scene);
     // return SDL_APP_CONTINUE=0 when continue
     // return SDL_APP_SUCCESS=1 when success
@@ -111,6 +144,13 @@ GixScene* gix_scene_new(GixApp* app) {
     scene->numb_compute_pipeline = 0;
     scene->user_data = NULL;
 
+#ifdef BUILD_DEBUG
+    scene->priv = SDL_malloc(sizeof(GixSceneDebugPrivate));
+    scene->priv->vertex_grid_3d_buffer = NULL;
+    scene->priv->line_grid_3d_buffer = NULL;
+    scene->priv->is_grid_3d_inited = false;
+#endif
+
     return scene;
 }
 
@@ -123,7 +163,9 @@ GixScene* gix_scene_from_file(GixApp* app, const char* file_path) {
     return scene;
 }
 
-void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func) {
+void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
+                    SceneUpdate update_func, SceneDraw draw_func,
+                    SceneQuit quit_func) {
     gix_if_null_exit(scene, gix_log("Can impl of NULL GixScene"));
     scene->scene_init = init_func;
     scene->scene_event = event_func;
@@ -132,24 +174,237 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
     scene->scene_quit = quit_func;
 }
 
+#ifdef BUILD_DEBUG
+void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint8 color[4],
+                                        vec2 x_start_end, vec2 z_start_end,
+                                        Uint32 numb_grid) {
+    if (scene->priv->is_grid_3d_inited) {
+        return;
+    }
+
+    scene->priv->numb_grid = numb_grid;
+
+    SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
+    SDL_Window* window = gix_app_get_window(scene->app);
+
+    // create vertex bufer
+    SDL_GPUBufferCreateInfo vertex_buffer_info = {
+        .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
+        .size = sizeof(VertexGrid3DLine),
+    };
+    scene->priv->vertex_grid_3d_buffer =
+        SDL_CreateGPUBuffer(device, &vertex_buffer_info);
+    // create storage buffer
+    SDL_GPUBufferCreateInfo line_data_buffer_info = {
+        .usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
+        .size = sizeof(Line3DData) * NUM_3D_DATA,
+    };
+    scene->priv->line_grid_3d_buffer =
+        SDL_CreateGPUBuffer(device, &line_data_buffer_info);
+
+    SDL_GPUTextureFormat depth_format =
+        gix_app_get_depth_texture_format(scene->app);
+
+    // setup pipeline
+    scene->priv->grid_3d_pipeLine =
+        SDL_malloc(sizeof(SDL_GPUGraphicsPipeline*));
+    // load shader
+    SDL_GPUShader* vertex_shader =
+        gix_load_shader(device, INTR_SHADER_VERTEX, INTR_SHADER_VERTEX_JSON,
+                        SDL_GPU_SHADERSTAGE_VERTEX);
+    SDL_GPUShader* frag_shader =
+        gix_load_shader(device, INTR_SHADER_FRAG, INTR_SHADER_FRAG_JSON,
+                        SDL_GPU_SHADERSTAGE_FRAGMENT);
+
+    // create color target description
+    SDL_GPUColorTargetDescription color_target_desc[1] = {
+        (SDL_GPUColorTargetDescription){
+            .format = SDL_GetGPUSwapchainTextureFormat(device, window),
+        },
+    };
+
+    // create vertex buffer desc
+    SDL_GPUVertexBufferDescription vert_buffer_desc[1] = {
+        {
+            .slot = 0,
+            .pitch = sizeof(VertexGrid3DLine),
+            .input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX,
+            .instance_step_rate = 0,
+        },
+    };
+    // vertex attr desc
+    SDL_GPUVertexAttribute vert_attr[1] = {
+        {
+            .buffer_slot = 0,
+            .location = 0,
+            .format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM,
+            .offset = offsetof(VertexGrid3DLine, color),
+        },
+    };
+    // vert input state
+    SDL_GPUVertexInputState vert_input_state = {
+        .num_vertex_buffers = 1,
+        .vertex_buffer_descriptions = vert_buffer_desc,
+        .num_vertex_attributes = 1,
+        .vertex_attributes = vert_attr,
+    };
+
+    // enable depth test
+    SDL_GPUDepthStencilState depth_stencil = {
+        .enable_depth_test = true,
+        .enable_depth_write = true,
+        .compare_op = SDL_GPU_COMPAREOP_LESS,
+    };
+
+    // create grphic pipeline
+    SDL_GPUGraphicsPipelineCreateInfo pipeline_info = {
+        .target_info =
+            {
+                .num_color_targets = 1,
+                .color_target_descriptions = color_target_desc,
+                .has_depth_stencil_target = true,
+                .depth_stencil_format = depth_format,
+            },
+        .vertex_input_state = vert_input_state,
+        .primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST,
+        .vertex_shader = vertex_shader,
+        .fragment_shader = frag_shader,
+        .depth_stencil_state = depth_stencil,
+    };
+    scene->priv->grid_3d_pipeLine =
+        SDL_CreateGPUGraphicsPipeline(device, &pipeline_info);
+    SDL_ReleaseGPUShader(device, vertex_shader);
+    SDL_ReleaseGPUShader(device, frag_shader);
+
+    // create transfer buffer
+    SDL_GPUTransferBufferCreateInfo transfer_buffer_info = {
+        .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
+        .size = (sizeof(VertexGrid3DLine) * NUM_GRID_3D_VERTEX) +
+                (sizeof(Line3DData) * NUM_3D_DATA),
+    };
+
+    SDL_GPUTransferBuffer* transfer_buffer =
+        SDL_CreateGPUTransferBuffer(device, &transfer_buffer_info);
+    // map transfer buffer
+    void* transfer_address =
+        SDL_MapGPUTransferBuffer(device, transfer_buffer, false);
+    VertexGrid3DLine data[NUM_GRID_3D_VERTEX] = {
+        {
+            .color = {color[0], color[1], color[2], color[3]},
+        },
+    };
+    // copy vertex
+    SDL_memcpy(transfer_address, &data,
+               sizeof(VertexGrid3DLine) * NUM_GRID_3D_VERTEX);
+    // copy storage buffer
+    Line3DData line_data[NUM_3D_DATA] = {
+        {
+            .start_end = {z_start_end[0], z_start_end[1]},
+            .increment = 1,
+        },
+        {
+            .start_end = {x_start_end[0], x_start_end[1]},
+            .increment = 1,
+        },
+    };
+    SDL_memcpy((Uint8*)transfer_address +
+                   (sizeof(VertexGrid3DLine) * NUM_GRID_3D_VERTEX),
+               line_data, sizeof(Line3DData) * NUM_3D_DATA);
+    // unmap
+    SDL_UnmapGPUTransferBuffer(device, transfer_buffer);
+
+    // upload buffer
+    //  Upload buffer data
+    SDL_GPUCommandBuffer* upload_cmd = SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(upload_cmd);
+    // upload vertex
+    SDL_GPUTransferBufferLocation src = {
+        .transfer_buffer = transfer_buffer,
+        .offset = 0,
+    };
+    SDL_GPUBufferRegion dst = {
+        .buffer = scene->priv->vertex_grid_3d_buffer,
+        .offset = 0,
+        .size = sizeof(VertexGrid3DLine) * NUM_GRID_3D_VERTEX,
+    };
+    SDL_UploadToGPUBuffer(copy_pass, &src, &dst, false);
+    // upload line data
+    src.offset = sizeof(VertexGrid3DLine) * NUM_GRID_3D_VERTEX;
+    dst.buffer = scene->priv->line_grid_3d_buffer;
+    dst.offset = 0;
+    dst.size = sizeof(Line3DData) * NUM_3D_DATA;
+    SDL_UploadToGPUBuffer(copy_pass, &src, &dst, false);
+    SDL_EndGPUCopyPass(copy_pass);
+
+    bool res = SDL_SubmitGPUCommandBuffer(upload_cmd);
+    gix_if_exit(!res, gix_log_error("Couldn't submit upload cmd in grid 3d"));
+    // release transfer buffer
+    SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
+
+    scene->priv->is_grid_3d_inited = true;
+}
+
+void __insternal_gix_scene_draw_3d_grid(GixScene* scene,
+                                        SDL_GPUCommandBuffer* cmd,
+                                        SDL_GPURenderPass* render_pass,
+                                        mat4 vp) {
+    SDL_BindGPUGraphicsPipeline(render_pass, scene->priv->grid_3d_pipeLine);
+    // bind vertex buffer
+    SDL_GPUBufferBinding vertex_buffer_binding[1] = {
+        {
+            .buffer = scene->priv->vertex_grid_3d_buffer,
+            .offset = 0,
+        },
+    };
+    SDL_BindGPUVertexBuffers(render_pass, 0, vertex_buffer_binding, 1);
+
+    // bind storage buffer
+    SDL_GPUBuffer* vertex_storage_buffer[1] = {
+        scene->priv->line_grid_3d_buffer,
+    };
+
+    SDL_BindGPUVertexStorageBuffers(render_pass, 0, vertex_storage_buffer, 1);
+    // push uniform
+    SDL_PushGPUVertexUniformData(cmd, 0, vp, sizeof(mat4));
+
+    // draw
+    Uint32 numb_instance = scene->priv->numb_grid;
+
+    SDL_DrawGPUPrimitives(render_pass, NUM_GRID_3D_VERTEX, numb_instance, 0, 0);
+}
+#endif
+
 void gix_scene_destroy(GixScene* scene) {
     gix_log("Destroy GixScene");
-
     gix_if_null_exit(scene, gix_log("Can not destroy NULl of scene"));
+    SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
     // free user data
     SDL_free(scene->user_data);
     // free graphic pipelines
     for (Uint8 i = 0; i < scene->numb_graphic_pipeline; i++) {
-        SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->graphic_pipeline[i]);
+        SDL_ReleaseGPUGraphicsPipeline(scene->app->device,
+                                       scene->graphic_pipeline[i]);
     }
     // free compute pipeline
     for (Uint8 i = 0; i < scene->numb_compute_pipeline; i++) {
-        SDL_ReleaseGPUGraphicsPipeline(scene->app->device, scene->compute_pipeline[i]);
+        SDL_ReleaseGPUGraphicsPipeline(scene->app->device,
+                                       scene->compute_pipeline[i]);
     }
     // free list graphic pipeline
     SDL_free(scene->graphic_pipeline);
     // free list compute pipeline
     SDL_free(scene->compute_pipeline);
+
+    // free debug
+#ifdef BUILD_DEBUG
+    SDL_ReleaseGPUBuffer(device, scene->priv->vertex_grid_3d_buffer);
+    SDL_ReleaseGPUBuffer(device, scene->priv->line_grid_3d_buffer);
+    SDL_ReleaseGPUGraphicsPipeline(device, scene->priv->grid_3d_pipeLine);
+    SDL_free(scene->priv);
+#endif
+
+    // free scene
+    SDL_free(scene);
 }
 
 GixApp* gix_app_new(const char* name) {
@@ -166,12 +421,16 @@ GixApp* gix_app_new(const char* name) {
     gix_if_null_exit(app->window, gix_log_error("Couldn't create window"));
 
     // Initialize GPUDevice
-    app->device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+    app->device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV |
+                                          SDL_GPU_SHADERFORMAT_DXIL |
+                                          SDL_GPU_SHADERFORMAT_MSL,
                                       true, NULL);
     gix_if_null_exit(app->device, gix_log_error("Couldn't create GPU device"));
 
     if (!SDL_ClaimWindowForGPUDevice(app->device, app->window)) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error on claim window for GPU device. %s", SDL_GetError());
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
+                     "Error on claim window for GPU device. %s",
+                     SDL_GetError());
     }
 
     app->loading_scene = NULL;
@@ -179,14 +438,16 @@ GixApp* gix_app_new(const char* name) {
     app->is_onload_scene = false;
     app->delta_time = 0;
     app->last_tick = 0;
-    SDL_GetWindowSize(app->window, &app->window_width, &app->window_height);
+    SDL_GetWindowSize(app->window, (int*)&app->window_width,
+                      (int*)&app->window_height);
 
     return app;
 }
 
 void gix_app_set_window_fullscreen(GixApp* app) {
     SDL_SetWindowFullscreen(app->window, true);
-    SDL_GetWindowSize(app->window, &app->window_width, &app->window_height);
+    SDL_GetWindowSize(app->window, (int*)&app->window_width,
+                      (int*)&app->window_height);
 }
 
 void gix_app_set_window_borderless(GixApp* app, bool borderless) {
@@ -197,7 +458,7 @@ void gix_app_set_name(GixApp* app, const char* name) {
     SDL_SetWindowTitle(app->window, name);
 }
 
-void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32 *height) {
+void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32* height) {
     *width = app->window_width;
     *height = app->window_height;
 }
@@ -241,35 +502,31 @@ SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene) {
     return result;
 }
 
-SDL_Window* gix_app_get_window(GixApp* app) {
-    return app->window;
-}
+SDL_Window* gix_app_get_window(GixApp* app) { return app->window; }
 
-SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app) {
-    return app->device;
-}
+SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app) { return app->device; }
 
 SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app) {
     SDL_GPUTextureFormat format;
-    if (SDL_GPUTextureSupportsFormat(app->device,
-                                     SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
-                                     SDL_GPU_TEXTURETYPE_2D,
-                                     SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+    if (SDL_GPUTextureSupportsFormat(
+            app->device, SDL_GPU_TEXTUREFORMAT_D32_FLOAT,
+            SDL_GPU_TEXTURETYPE_2D,
+            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
         format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
-    } else if (SDL_GPUTextureSupportsFormat(app->device,
-                                            SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
-                                            SDL_GPU_TEXTURETYPE_2D,
-                                            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+    } else if (SDL_GPUTextureSupportsFormat(
+                   app->device, SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT,
+                   SDL_GPU_TEXTURETYPE_2D,
+                   SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
         format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT_S8_UINT;
-    } else if (SDL_GPUTextureSupportsFormat(app->device,
-                                            SDL_GPU_TEXTUREFORMAT_D24_UNORM,
-                                            SDL_GPU_TEXTURETYPE_2D,
-                                            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+    } else if (SDL_GPUTextureSupportsFormat(
+                   app->device, SDL_GPU_TEXTUREFORMAT_D24_UNORM,
+                   SDL_GPU_TEXTURETYPE_2D,
+                   SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
         format = SDL_GPU_TEXTUREFORMAT_D24_UNORM;
-    } else if (SDL_GPUTextureSupportsFormat(app->device,
-                                            SDL_GPU_TEXTUREFORMAT_D24_UNORM_S8_UINT,
-                                            SDL_GPU_TEXTURETYPE_2D,
-                                            SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
+    } else if (SDL_GPUTextureSupportsFormat(
+                   app->device, SDL_GPU_TEXTUREFORMAT_D24_UNORM_S8_UINT,
+                   SDL_GPU_TEXTURETYPE_2D,
+                   SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)) {
         format = SDL_GPU_TEXTUREFORMAT_D24_UNORM_S8_UINT;
     } else {
         format = SDL_GPU_TEXTUREFORMAT_D16_UNORM;

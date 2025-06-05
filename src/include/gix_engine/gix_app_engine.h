@@ -2,25 +2,52 @@
 #define __GIX_APP_ENGINE_H__
 
 #include <SDL3/SDL.h>
+#include <cglm/cglm.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define GIX_ARRAY(t, arr...) (t) arr
+
 #define gix_scene_init(scene) scene->scene_init(scene)
 #define gix_scene_event(scene, event) scene->scene_event(scene, event)
-#define gix_scene_update(scene, delta_time) scene->scene_update(scene, delta_time)
+#define gix_scene_update(scene, delta_time) \
+    scene->scene_update(scene, delta_time)
 #define gix_scene_draw(scene) scene->scene_draw(scene)
 #define gix_scene_quit(scene) scene->scene_quit(scene)
+
+#ifdef BUILD_DEBUG
+#define gix_scene_setup_3d_grid(scene_ptr, color_u8_4, x_start_end_vec2,     \
+                                z_start_end_vec2, numb_grid_u32)             \
+    (__internal_gix_scene_setup_3d_grid)(scene_ptr, color_u8_4,              \
+                                         x_start_end_vec2, z_start_end_vec2, \
+                                         numb_grid_u32)
+#define gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr, render_pass_ptr, \
+                               vp_mat4)                                    \
+    __insternal_gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr,          \
+                                       render_pass_ptr, vp_mat4)
+#else
+#define gix_scene_setup_3d_grid(scene_ptr, color_u8_4, x_start_end_vec2, \
+                                z_start_end_vec2, numb_grid_u32)
+#define gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr, render_pass_ptr, \
+                               vp_mat4)
+#endif
 
 ///* GixScene struct is used to create a scene in the GixApp engine.
 ///* All GixScene field are public
 typedef struct _GixScene GixScene;
 
-///* GixApp struct is used to create a GixApp engine.
-///* All GixApp field are private. But you can use GixApp public function to access it.
-///* GixApp is a singleton class, you can only create one instance of it.
+///* GixApp struct is used to create a
+/// GixApp engine.
+///* All GixApp field are private. But
+/// you can use GixApp public function
+/// to access it.
+///* GixApp is a singleton class, you
+/// can only create one instance of it.
 typedef struct _GixApp GixApp;
+
+typedef struct _GixSceneDebugPrivate GixSceneDebugPrivate;
 
 typedef SDL_AppResult (*SceneInit)(GixScene* self);
 typedef SDL_AppResult (*SceneEvent)(GixScene* self, const SDL_Event* event);
@@ -51,6 +78,10 @@ struct _GixScene {
 
     /// User Data
     void* user_data;
+
+#ifdef BUILD_DEBUG
+    GixSceneDebugPrivate* priv;
+#endif
 };
 
 /*SCENE PUBLIC FUNCTION*/
@@ -68,44 +99,78 @@ GixScene* gix_scene_new(GixApp* app);
  * @param app GixApp pointer
  * @param file_path Path to file
  * @return GixScene*
- * @note This function will load scene from file
+ * @note This function will load scene
+ * from file
  */
 GixScene* gix_scene_from_file(GixApp* app, const char* file_path);
 
 /**
- * @brief Set scene implementation function
+ * @brief Set scene implementation
+ * function
  *
  * @param scene GixScene pointer
  * @param init_func SceneInit function
  * @param event_func SceneEvent function
- * @param update_func SceneUpdate function
+ * @param update_func SceneUpdate
+ * function
  * @param draw_func SceneDraw function
  * @param quit_func SceneQuit function
  */
-void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func, SceneUpdate update_func, SceneDraw draw_func, SceneQuit quit_func);
+void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
+                    SceneUpdate update_func, SceneDraw draw_func,
+                    SceneQuit quit_func);
 
 /**
- * @brief Allocate graphic pipeline of GixScene
+ * @brief Allocate graphic pipeline of
+ * GixScene
  *
  * @param scene GixScene pointer
- * @param numb Number of graphic pipeline. Value: 0-255
+ * @param numb Number of graphic
+ * pipeline. Value: 0-255
+ * @note This function must be called
+ * once only on init scene.
  */
-static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene, Uint8 numb) {
+static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene,
+                                                    Uint8 numb) {
+#ifdef BUILD_DEBUG
+    scene->numb_graphic_pipeline = numb + 1;  // 1 for g3d grid
+#else
     scene->numb_graphic_pipeline = numb;
-    scene->graphic_pipeline = SDL_malloc(sizeof(void*) * numb);
+#endif
+    scene->graphic_pipeline =
+        SDL_malloc(sizeof(void*) * scene->numb_graphic_pipeline);
 }
 
 /**
- * @brief Allocate compute pipeline of GixScene
+ * @brief Allocate compute pipeline of
+ * GixScene
  *
  * @param scene GixScene pointer
- * @param numb Number of compute pipeline. Value: 0-255
+ * @param numb Number of compute
+ * pipeline. Value: 0-255
  */
-static inline void gix_scene_alloc_compute_pipeline(GixScene* scene, Uint8 numb) {
+static inline void gix_scene_alloc_compute_pipeline(GixScene* scene,
+                                                    Uint8 numb) {
     scene->numb_compute_pipeline = numb;
     scene->compute_pipeline = SDL_malloc(sizeof(void*) * numb);
 }
 
+#ifdef BUILD_DEBUG
+
+void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint8 color[4],
+                                        vec2 x_start_end, vec2 z_start_end,
+                                        Uint32 numb_grid);
+#define __internal_gix_scene_setup_3d_grid(...) \
+    Error:                                      \
+    use gix_scene_setup_3d_grid instead
+void __insternal_gix_scene_draw_3d_grid(GixScene* scene,
+                                        SDL_GPUCommandBuffer* cmd,
+                                        SDL_GPURenderPass* render_pass,
+                                        mat4 vp);
+#define __insternal_gix_scene_draw_3d_grid(...) \
+    Error:                                      \
+    use gix_scene_draw_3d_grid instead
+#endif
 /**
  * @brief Destroy GixScene
  *
@@ -117,24 +182,31 @@ struct _GixApp;
 
 /*APP PUBLIC FUNCTION*/
 /**
- * @brief Init GixApp here. here we can set scene, window size, position, name, etc. This function is entry of GixApp engine.
+ * @brief Init GixApp here. here we can
+ * set scene, window size, position,
+ * name, etc. This function is entry of
+ * GixApp engine.
  *
- * @param app GixApp pointer, passed from engine.
+ * @param app GixApp pointer, passed
+ * from engine.
  */
 extern void gix_app_init(GixApp* app);
 
 /**
- * @brief Set GixApp window to fullscreen
+ * @brief Set GixApp window to
+ * fullscreen
  *
  * @param app GixApp pointer
  */
 void gix_app_set_window_fullscreen(GixApp* app);
 
 /**
- * @brief Set GixApp window to borderless or not
+ * @brief Set GixApp window to
+ * borderless or not
  *
  * @param app GixApp pointer
- * @param borderless Bool value to set window borderless or not
+ * @param borderless Bool value to set
+ * window borderless or not
  */
 void gix_app_set_window_borderless(GixApp* app, bool borderless);
 
@@ -159,8 +231,10 @@ void gix_app_set_window_size(GixApp* app, int width, int height);
  * @brief Get Window size of GixApp
  *
  * @param app GixApp pointer
- * @param width Uint32 pointer to hold window width value
- * @param height Uint32 pointer to hold window height value
+ * @param width Uint32 pointer to hold
+ * window width value
+ * @param height Uint32 pointer to hold
+ * window height value
  */
 void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32* height);
 
@@ -168,8 +242,10 @@ void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32* height);
  * @brief Set GixApp window position
  *
  * @param app GixApp pointer
- * @param x Integer value of x position or use SDL_WINDOWPOS_CENTERED
- * @param y Integer value of y position or use SDL_WINDOWPOS_CENTERED
+ * @param x Integer value of x position
+ * or use SDL_WINDOWPOS_CENTERED
+ * @param y Integer value of y position
+ * or use SDL_WINDOWPOS_CENTERED
  */
 void gix_app_set_window_position(GixApp* app, int x, int y);
 
@@ -188,7 +264,9 @@ void gix_app_set_loading_scene(GixApp* app, GixScene* scene);
  *
  * @param app GixApp pointer
  * @param scene GixScene pointer
- * @return SDL_AppResult. return SDL_APP_CONTINUE if success, SDL_APP_FAILURE if failed
+ * @return SDL_AppResult. return
+ * SDL_APP_CONTINUE if success,
+ * SDL_APP_FAILURE if failed
  */
 SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene);
 
@@ -196,7 +274,8 @@ SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene);
  * @brief Get GixApp window
  *
  * @param app GixApp pointer
- * @return SDL_Window* SDL_Window pointer
+ * @return SDL_Window* SDL_Window
+ * pointer
  */
 SDL_Window* gix_app_get_window(GixApp* app);
 
@@ -204,7 +283,8 @@ SDL_Window* gix_app_get_window(GixApp* app);
  * @brief Get GixApp GPU device
  *
  * @param app GixApp pointer
- * @return SDL_GPUDevice* SDL_GPUDevice pointer
+ * @return SDL_GPUDevice* SDL_GPUDevice
+ * pointer
  */
 SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app);
 
