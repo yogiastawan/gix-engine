@@ -12,12 +12,10 @@ typedef struct _GixInternalShaderInfo {
 
 static GixInternalShaderInfo read_shader_info(const char* file);
 
-SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device,
-                               const char* shader_file,
+SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device, const char* shader_file,
                                const char* info_file,
                                SDL_GPUShaderStage shader_stage) {
-    SDL_GPUShaderFormat backend_format =
-        SDL_GetGPUShaderFormats(device);
+    SDL_GPUShaderFormat backend_format = SDL_GetGPUShaderFormats(device);
     const char* entry_point = NULL;
 #ifdef GIX_VULKAN
     entry_point = "main";
@@ -30,17 +28,15 @@ SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device,
     entry_point = NULL;
 #endif
 
-    gix_if_null_exit(entry_point,
-                     gix_log("Do not supported shader format"));
+    gix_if_null_exit(entry_point, gix_log("Do not supported shader format"));
     gix_if_exit(!backend_format,
-                gix_log("Invalid shader format. Choose format by set SHADER_FORMAT to GIX_VULKAN, GIX_MSL, or GIX_DXIL"));
+                gix_log("Invalid shader format. Choose format by set "
+                        "SHADER_FORMAT to GIX_VULKAN, GIX_MSL, or GIX_DXIL"));
 
     size_t shader_code_size = 0;
-    void* shader_code = SDL_LoadFile(shader_file,
-                                     &shader_code_size);
+    void* shader_code = SDL_LoadFile(shader_file, &shader_code_size);
 
-    gix_if_null_exit(shader_code,
-                     gix_log_error("Can not load shader file"));
+    gix_if_null_exit(shader_code, gix_log_error("Can not load shader file"));
 
     //  Get shader info from json file
     GixInternalShaderInfo info = read_shader_info(info_file);
@@ -58,10 +54,8 @@ SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device,
 
     };
 
-    SDL_GPUShader* shader = SDL_CreateGPUShader(device,
-                                                &shader_info);
-    gix_if_null_exit(shader,
-                     gix_log_error("Cannot create shader"));
+    SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shader_info);
+    gix_if_null_exit(shader, gix_log_error("Cannot create shader"));
 
     SDL_free(shader_code);
 

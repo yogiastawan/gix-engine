@@ -8,7 +8,7 @@ extern "C" {
 #ifdef BUILD_DEBUG
 #include <stdlib.h>
 
-    static size_t exit_code = 0;
+static size_t exit_code = 0;
 
 #define gix_if_return(logic, exec, ret) \
     if (logic) {                        \

@@ -9,9 +9,8 @@ extern "C" {
 #define GIX_ENGINE_MINOR_VERSION 1
 #define GIX_ENGINE_PATCH_VERSION 0
 
-#define GIX_ENGINE_VERSION_NUM          \
-    ((GIX_ENGINE_MAJOR_VERSION << 16) | \
-     (GIX_ENGINE_MINOR_VERSION << 8) |  \
+#define GIX_ENGINE_VERSION_NUM                                            \
+    ((GIX_ENGINE_MAJOR_VERSION << 16) | (GIX_ENGINE_MINOR_VERSION << 8) | \
      GIX_ENGINE_PATCH_VERSION)
 #define GIX_ENGINE_VERSION "0.1.0"
 

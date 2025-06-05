@@ -1,24 +1,29 @@
-cbuffer MVP : register(b0, space1) {
+cbuffer MVP : register(b0, space1)
+{
     float4x4 vp;
 };
 
-struct VertexInput {
+struct VertexInput
+{
     float3 color;
 };
 
-struct GridObj {
-    float point_v[2];  // 0 start,1 end
+struct GridObj
+{
+    float point_v[2]; // 0 start,1 end
     uint increment;
 };
 
-StructuredBuffer<GridObj> line_data : register(t0, space0);  // 0 for z line, 1 for x line
+StructuredBuffer<GridObj> line_data : register(t0, space0); // 0 for z line, 1 for x line
 
-struct VertOutput {
+struct VertOutput
+{
     float4 position : SV_POSITION;
     float4 color : TEXCOORD0;
 };
 
-VertOutput main(VertexInput input, uint vert_id : SV_VertexID, uint instance_id : SV_InstanceID) {
+VertOutput main(VertexInput input, uint vert_id : SV_VertexID, uint instance_id : SV_InstanceID)
+{
     VertOutput output;
     output.color = float4(input.color, 1.0f);
 
