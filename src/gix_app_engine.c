@@ -63,13 +63,12 @@ typedef struct Grid3DUniform {
 static GixApp* gix_app_new(const char* name);
 static void gix_app_destroy(GixApp* app);
 
-static const char* concate_str(const char* dir, const char* file_name) {
+static char* concate_str(const char* dir, const char* file_name) {
     size_t dir_len = SDL_strlen(dir);
     size_t name_len = SDL_strlen(file_name);
-    char* out = SDL_malloc(sizeof(char) * (dir_len + name_len + 2));
-    size_t max_len = dir_len + name_len + 2;
+    char* out = SDL_malloc(sizeof(char) * (dir_len + name_len + 1));
+    size_t max_len = dir_len + name_len + 1;
     SDL_strlcpy(out, dir, max_len);
-    SDL_strlcat(out, "/", max_len);
     SDL_strlcat(out, file_name, max_len);
     gix_log("str_out=%s", out);
     return out;
@@ -231,19 +230,36 @@ void __internal_gix_scene_setup_3d_grid(GixScene* scene, vec2 x_start_end,
     scene->priv->grid_3d_pipeLine =
         SDL_malloc(sizeof(SDL_GPUGraphicsPipeline*));
     // load shader
-    const char* ver_file =
-        concate_str(GIX_ENGINE_SHADER_DIR, "3d_grid.vert.spv");
-    const char* vert_json =
-        concate_str(GIX_ENGINE_SHADER_DIR, "3d_grid.vert.json");
+#ifdef GIX_VULKAN
+    const char* vert_file_name = "/SPIRV/3d_grid.vert.spv";
+    const char* vert_file_info = "/SPIRV/3d_grid.vert.json";
+    const char* frag_file_name = "/SPIRV/3d_grid.frag.spv";
+    const char* frag_file_info = "/SPIRV/3d_grid.frag.json";
+#elif GIX_MSL
+    const char* vert_file_name = "/MSL/3d_grid.vert.msl";
+    const char* vert_file_info = "/MSL/3d_grid.vert.json";
+    const char* frag_file_name = "/MSL/3d_grid.frag.msl";
+    const char* frag_file_info = "/MSL/3d_grid.frag.json";
+#elif GX_DXIL
+    const char* vert_file_name = "/DXIL/3d_grid.vert.dxil";
+    const char* vert_file_info = "/DXIL/3d_grid.vert.json";
+    const char* frag_file_name = "/DXIL/3d_grid.frag.dxil";
+    const char* frag_file_info = "/DXIL/3d_grid.frag.json";
+#else
+    const char* vert_file_name = NULL;
+    const char* vert_file_info = NULL;
+    const char* frag_file_name = NULL;
+    const char* frag_file_info = NULL;
+#endif
+    char* ver_file = concate_str(GIX_ENGINE_SHADER_DIR, vert_file_name);
+    char* vert_json = concate_str(GIX_ENGINE_SHADER_DIR, vert_file_info);
     SDL_GPUShader* vertex_shader = gix_load_shader(device, ver_file, vert_json,
                                                    SDL_GPU_SHADERSTAGE_VERTEX);
     SDL_free(ver_file);
     SDL_free(vert_json);
 
-    const char* farg_file =
-        concate_str(GIX_ENGINE_SHADER_DIR, "3d_grid.frag.spv");
-    const char* frag_json =
-        concate_str(GIX_ENGINE_SHADER_DIR, "3d_grid.frag.json");
+    char* farg_file = concate_str(GIX_ENGINE_SHADER_DIR, frag_file_name);
+    char* frag_json = concate_str(GIX_ENGINE_SHADER_DIR, frag_file_info);
     SDL_GPUShader* frag_shader = gix_load_shader(device, farg_file, frag_json,
                                                  SDL_GPU_SHADERSTAGE_FRAGMENT);
 
