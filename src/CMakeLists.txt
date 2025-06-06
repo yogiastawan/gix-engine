@@ -10,4 +10,9 @@ set(srcs gix_app_engine.c
 add_library(${PROJECT_NAME} ${BUILD_LIBRARY_TYPE} ${srcs})
 target_link_libraries(${PROJECT_NAME} SDL3::SDL3 cglm json-c ${MATH})
 
+add_custom_target(compile_shader
+    ALL
+    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/shader DST=${GIX_ENGINE_SHADER_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh')
+add_dependencies(${PROJECT_NAME} compile_shader)
+
 

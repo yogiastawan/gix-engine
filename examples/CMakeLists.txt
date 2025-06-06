@@ -1,11 +1,6 @@
 project(examples)
 include_directories(../src/include)
 
-if(NOT DEFINED SDL_SHADER_CROSS)
-    message("Please set file SDLShadercross file using -DSDL_SHADER_CROSS=\"path\"")
-    set(SDL_SHADER_CROSS /home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross)
-endif()
-
 # example for gix-engine
 add_executable(clear_screen clear_screen/main.c clear_screen/scene.c)
 target_link_libraries(clear_screen gix-engine)

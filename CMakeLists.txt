@@ -35,10 +35,10 @@ add_compile_definitions(GIX_ENGINE_PATCH_VERSION=${PROJECT_VERSION_PATCH})
 add_compile_definitions(GIX_ENGINE_VERSION="${PROJECT_VERSION}")
 # system shader build output
 if(NOT DEFINED ENGINE_SHADER_OUT)
-    set(ENGINE_SHADER_OUT ${CMAKE_CURRENT_BINARY_DIR}/shader)
-    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${CMAKE_CURRENT_BINARY_DIR}/shader")
+    set(GIX_ENGINE_SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shader)
+    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${CMAKE_BINARY_DIR}/gix_engine_shader")
 else()
-    set(ENGINE_SHADER_OUT ENGINE_SHADER_OUT)
+    set(GIX_ENGINE_SHADER_DIR ENGINE_SHADER_OUT)
     add_compile_definitions(GIX_ENGINE_SHADER_DIR="${ENGINE_SHADER_OUT}")
 endif()
 
@@ -67,6 +67,7 @@ if(BUILD_EXAMPLE)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLE)
 
+# library type
 if(BUILD_STATIC)
     message("Configure to STATIC library. To create SHARED Library use: -DBUILD_STATIC=OFF")
     set(BUILD_LIBRARY_TYPE STATIC)
@@ -76,6 +77,12 @@ else()
     set(BUILD_LIBRARY_TYPE SHARED)
 
 endif(BUILD_STATIC)
+
+# shadercross path
+if(NOT DEFINED SDL_SHADER_CROSS)
+    message("Please set file SDLShadercross file using -DSDL_SHADER_CROSS=\"path\"")
+    set(SDL_SHADER_CROSS /home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross)
+endif()
 
 add_subdirectory(src)
 target_include_directories(${PROJECT_NAME} PRIVATE src/include)
