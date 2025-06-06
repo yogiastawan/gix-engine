@@ -33,6 +33,7 @@ extern "C" {
 #else
 #define gix_scene_setup_3d_grid(...)
 #define gix_scene_draw_3d_grid(...)
+#define gix_scene_set_3d_grid_numb_line(...)
 #endif
 
 ///* GixScene struct is used to create a scene in the GixApp engine.
