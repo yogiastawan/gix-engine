@@ -8,6 +8,10 @@
 extern "C" {
 #endif
 
+#ifndef ENGINE_SHADER_OUT
+#define ENGINE_SHADER_OUT
+#endif
+
 #define GIX_ENGINE_NUMB_GRID_3D_LINE_DEFAULT 50
 #define GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT (Uint8[4]){100, 100, 100, 255}
 
