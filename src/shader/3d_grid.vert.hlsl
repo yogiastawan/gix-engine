@@ -1,6 +1,7 @@
 cbuffer MVP : register(b0, space1)
 {
     float4x4 vp;
+    uint numb_instance;
 };
 
 struct VertexInput
@@ -49,14 +50,16 @@ VertOutput main(VertexInput input, uint vert_id : SV_VertexID, uint instance_id 
     float z_start_odd = 0.f;
     float z_end_odd = 0.f;
 
+    // select value even or odd
     float start_x = lerp(x_start_event, x_start_odd, (float)blend_factor);
     float end_x = lerp(x_end_event, x_end_odd, (float)blend_factor);
     float start_z = lerp(z_start_event, z_start_odd, (float)blend_factor);
     float end_z = lerp(z_end_event, z_end_odd, (float)blend_factor);
 
     // offset
-    float offset = (float)instance_id * (float)line_data[instance_id].increment;
+    float offset = (float)(instance_id - (numb_instance / 2)) * (float)line_data[blend_factor].increment;
 
+    // select vertex start or end
     float current_vertex_x = lerp(start_x, end_x, (float)vert_id % 2) + offset;
     float current_vertex_z = lerp(start_z, end_z, (float)vert_id % 2) + offset;
 

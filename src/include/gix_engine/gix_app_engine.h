@@ -8,7 +8,8 @@
 extern "C" {
 #endif
 
-#define GIX_ARRAY(t, arr...) (t) arr
+#define GIX_ENGINE_NUMB_GRID_3D_LINE_DEFAULT 50
+#define GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT (Uint8[4]){100, 100, 100, 255}
 
 #define gix_scene_init(scene) scene->scene_init(scene)
 #define gix_scene_event(scene, event) scene->scene_event(scene, event)
@@ -18,20 +19,20 @@ extern "C" {
 #define gix_scene_quit(scene) scene->scene_quit(scene)
 
 #ifdef BUILD_DEBUG
-#define gix_scene_setup_3d_grid(scene_ptr, color_u8_4, x_start_end_vec2,     \
-                                z_start_end_vec2, numb_grid_u32)             \
-    (__internal_gix_scene_setup_3d_grid)(scene_ptr, color_u8_4,              \
-                                         x_start_end_vec2, z_start_end_vec2, \
-                                         numb_grid_u32)
+#define gix_scene_setup_3d_grid(scene_ptr, color_u8_4, x_start_end_vec2, \
+                                z_start_end_vec2)                        \
+    (__internal_gix_scene_setup_3d_grid)(scene_ptr, color_u8_4,          \
+                                         x_start_end_vec2, z_start_end_vec2)
 #define gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr, render_pass_ptr, \
                                vp_mat4)                                    \
-    __insternal_gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr,          \
-                                       render_pass_ptr, vp_mat4)
+    __internal_gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr,           \
+                                      render_pass_ptr, vp_mat4)
+
+#define gix_scene_set_3d_grid_numb_line(scene_ptr, numb_line_u32) \
+    __internal_gix_scene_set_3d_grid_numb_line(scene_ptr, numb_line_u32)
 #else
-#define gix_scene_setup_3d_grid(scene_ptr, color_u8_4, x_start_end_vec2, \
-                                z_start_end_vec2, numb_grid_u32)
-#define gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr, render_pass_ptr, \
-                               vp_mat4)
+#define gix_scene_setup_3d_grid(...)
+#define gix_scene_draw_3d_grid(...)
 #endif
 
 ///* GixScene struct is used to create a scene in the GixApp engine.
@@ -132,11 +133,7 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
  */
 static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene,
                                                     Uint8 numb) {
-#ifdef BUILD_DEBUG
-    scene->numb_graphic_pipeline = numb + 1;  // 1 for g3d grid
-#else
     scene->numb_graphic_pipeline = numb;
-#endif
     scene->graphic_pipeline =
         SDL_malloc(sizeof(void*) * scene->numb_graphic_pipeline);
 }
@@ -158,18 +155,23 @@ static inline void gix_scene_alloc_compute_pipeline(GixScene* scene,
 #ifdef BUILD_DEBUG
 
 void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint8 color[4],
-                                        vec2 x_start_end, vec2 z_start_end,
-                                        Uint32 numb_grid);
+                                        vec2 x_start_end, vec2 z_start_end);
 #define __internal_gix_scene_setup_3d_grid(...) \
     Error:                                      \
-    use gix_scene_setup_3d_grid instead
-void __insternal_gix_scene_draw_3d_grid(GixScene* scene,
-                                        SDL_GPUCommandBuffer* cmd,
-                                        SDL_GPURenderPass* render_pass,
-                                        mat4 vp);
-#define __insternal_gix_scene_draw_3d_grid(...) \
-    Error:                                      \
-    use gix_scene_draw_3d_grid instead
+    use function gix_scene_setup_3d_grid instead
+void __internal_gix_scene_draw_3d_grid(GixScene* scene,
+                                       SDL_GPUCommandBuffer* cmd,
+                                       SDL_GPURenderPass* render_pass, mat4 vp);
+#define __internal_gix_scene_draw_3d_grid(...) \
+    Error:                                     \
+    use function gix_scene_draw_3d_grid instead
+
+void __internal_gix_scene_set_3d_grid_numb_line(GixScene* scene,
+                                                Uint32 numb_line);
+
+#define __internal_gix_scene_set_3d_grid_numb_line(...) \
+    Error:                                              \
+    use function gix_scene_set_3d_grid_numb_line instead
 #endif
 /**
  * @brief Destroy GixScene
