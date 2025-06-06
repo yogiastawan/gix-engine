@@ -19,21 +19,25 @@ extern "C" {
 #define gix_scene_quit(scene) scene->scene_quit(scene)
 
 #ifdef BUILD_DEBUG
-#define gix_scene_setup_3d_grid(scene_ptr, color_u8_4, x_start_end_vec2, \
-                                z_start_end_vec2)                        \
-    (__internal_gix_scene_setup_3d_grid)(scene_ptr, color_u8_4,          \
-                                         x_start_end_vec2, z_start_end_vec2)
+#define gix_scene_setup_3d_grid(scene_ptr, x_start_end_vec2, z_start_end_vec2) \
+    (__internal_gix_scene_setup_3d_grid)(scene_ptr, x_start_end_vec2,          \
+                                         z_start_end_vec2)
+
 #define gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr, render_pass_ptr, \
                                vp_mat4)                                    \
-    (__internal_gix_scene_draw_3d_grid)(scene_ptr, cmd_buffer_ptr,           \
-                                      render_pass_ptr, vp_mat4)
+    (__internal_gix_scene_draw_3d_grid)(scene_ptr, cmd_buffer_ptr,         \
+                                        render_pass_ptr, vp_mat4)
 
 #define gix_scene_set_3d_grid_numb_line(scene_ptr, numb_line_u32) \
     (__internal_gix_scene_set_3d_grid_numb_line)(scene_ptr, numb_line_u32)
+
+#define gix_scene_set_3d_grid_color(scene_ptr, color_u8_4) \
+    __internal_gix_scene_set_3d_grid_color(scene_ptr, color_u8_4)
 #else
 #define gix_scene_setup_3d_grid(...)
 #define gix_scene_draw_3d_grid(...)
 #define gix_scene_set_3d_grid_numb_line(...)
+#define gix_scene_set_3d_grid_color()
 #endif
 
 ///* GixScene struct is used to create a scene in the GixApp engine.
@@ -154,9 +158,8 @@ static inline void gix_scene_alloc_compute_pipeline(GixScene* scene,
 }
 
 #ifdef BUILD_DEBUG
-
-void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint8 color[4],
-                                        vec2 x_start_end, vec2 z_start_end);
+void __internal_gix_scene_setup_3d_grid(GixScene* scene, vec2 x_start_end,
+                                        vec2 z_start_end);
 #define __internal_gix_scene_setup_3d_grid(...) \
     Error:                                      \
     use function gix_scene_setup_3d_grid instead
@@ -173,7 +176,13 @@ void __internal_gix_scene_set_3d_grid_numb_line(GixScene* scene,
 #define __internal_gix_scene_set_3d_grid_numb_line(...) \
     Error:                                              \
     use function gix_scene_set_3d_grid_numb_line instead
+
+void __internal_gix_scene_set_3d_grid_color(GixScene* scene, Uint8 color[4]);
+#define __internal_gix_scene_set_3d_grid_color(...) \
+    Error:                                          \
+    use function gix_scene_set_3d_grid_color instead
 #endif
+
 /**
  * @brief Destroy GixScene
  *
