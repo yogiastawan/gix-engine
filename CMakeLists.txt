@@ -23,6 +23,16 @@ if(NOT DEFINED JSON_C_DIR)
     set(JSON_C_DIR libs/json-c-0.18)
 endif()
 
+# add libs
+add_subdirectory(${SDL3_DIR} EXCLUDE_FROM_ALL)
+add_subdirectory(${CGLM_DIR} EXCLUDE_FROM_ALL)
+add_subdirectory(${JSON_C_DIR} EXCLUDE_FROM_ALL)
+
+#version
+add_compile_definitions(GIX_ENGINE_MAJOR_VERSION=${PROJECT_VERSION_MAJOR})
+add_compile_definitions(GIX_ENGINE_MINOR_VERSION=${PROJECT_VERSION_MINOR})
+add_compile_definitions(GIX_ENGINE_PATCH_VERSION=${PROJECT_VERSION_PATCH})
+add_compile_definitions(GIX_ENGINE_VERSION="${PROJECT_VERSION}")
 # system shader build output
 if(NOT DEFINED ENGINE_SHADER_OUT)
     set(ENGINE_SHADER_OUT ${CMAKE_CURRENT_BINARY_DIR}/shader)
@@ -31,15 +41,6 @@ else()
     set(ENGINE_SHADER_OUT ENGINE_SHADER_OUT)
     add_compile_definitions(GIX_ENGINE_SHADER_DIR="${ENGINE_SHADER_OUT}")
 endif()
-
-
-
-
-# add libs
-add_subdirectory(${SDL3_DIR} EXCLUDE_FROM_ALL)
-add_subdirectory(${CGLM_DIR} EXCLUDE_FROM_ALL)
-add_subdirectory(${JSON_C_DIR} EXCLUDE_FROM_ALL)
-
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/Wall)
