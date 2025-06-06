@@ -34,12 +34,9 @@ add_compile_definitions(GIX_ENGINE_MINOR_VERSION=${PROJECT_VERSION_MINOR})
 add_compile_definitions(GIX_ENGINE_PATCH_VERSION=${PROJECT_VERSION_PATCH})
 add_compile_definitions(GIX_ENGINE_VERSION="${PROJECT_VERSION}")
 # system shader build output
-if(NOT DEFINED ENGINE_SHADER_OUT)
-    set(GIX_ENGINE_SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/shader)
-    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${CMAKE_BINARY_DIR}/gix_engine_shader")
-else()
-    set(GIX_ENGINE_SHADER_DIR ENGINE_SHADER_OUT)
-    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${ENGINE_SHADER_OUT}")
+if(NOT DEFINED GIX_ENGINE_SHADER_DIR)
+    set(GIX_ENGINE_SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/gix_engine_shader)
+    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_DIR}")
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
@@ -63,6 +60,13 @@ else()
     add_compile_definitions(${SHADER_FORMAT})
 endif()
 
+# shadercross path
+if(NOT DEFINED SDL_SHADER_CROSS)
+    message("Please set file SDLShadercross file using -DSDL_SHADER_CROSS=\"path\"")
+    set(SDL_SHADER_CROSS /home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross)
+endif()
+
+
 if(BUILD_EXAMPLE)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLE)
@@ -78,14 +82,8 @@ else()
 
 endif(BUILD_STATIC)
 
-# shadercross path
-if(NOT DEFINED SDL_SHADER_CROSS)
-    message("Please set file SDLShadercross file using -DSDL_SHADER_CROSS=\"path\"")
-    set(SDL_SHADER_CROSS /home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross)
-endif()
-
 add_subdirectory(src)
-target_include_directories(${PROJECT_NAME} PRIVATE src/include)
+target_include_directories(${PROJECT_NAME} PUBLIC src/include)
 
 include(CTest)
 enable_testing()
