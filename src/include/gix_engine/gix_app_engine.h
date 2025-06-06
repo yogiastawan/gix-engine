@@ -25,11 +25,11 @@ extern "C" {
                                          x_start_end_vec2, z_start_end_vec2)
 #define gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr, render_pass_ptr, \
                                vp_mat4)                                    \
-    __internal_gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr,           \
+    (__internal_gix_scene_draw_3d_grid)(scene_ptr, cmd_buffer_ptr,           \
                                       render_pass_ptr, vp_mat4)
 
 #define gix_scene_set_3d_grid_numb_line(scene_ptr, numb_line_u32) \
-    __internal_gix_scene_set_3d_grid_numb_line(scene_ptr, numb_line_u32)
+    (__internal_gix_scene_set_3d_grid_numb_line)(scene_ptr, numb_line_u32)
 #else
 #define gix_scene_setup_3d_grid(...)
 #define gix_scene_draw_3d_grid(...)
