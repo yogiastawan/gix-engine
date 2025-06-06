@@ -51,6 +51,7 @@ static size_t exit_code = 0;
         exit(exit_code + 1);            \
     }
 #else
+#define gix_if_return(logic, exec, ret)
 #define gix_if(ptr, exec)
 #define gix_if_null(ptr, exec)
 #define gix_if_not_null(ptr, exec)
