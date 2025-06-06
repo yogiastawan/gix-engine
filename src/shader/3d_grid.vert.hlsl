@@ -6,7 +6,7 @@ cbuffer MVP : register(b0, space1)
 
 struct VertexInput
 {
-    float3 color;
+    float3 color : TEXCOORD0;
 };
 
 struct GridObj
