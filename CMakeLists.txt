@@ -65,24 +65,28 @@ else()
     add_compile_definitions(${SHADER_FORMAT})
 endif()
 
-
 if(BUILD_EXAMPLE)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLE)
+
+set(BUILD_LIBRARY_TYPE)
+
+if(BUILD_STATIC)
+    message("Configure to static library")
+    set(BUILD_LIBRARY_TYPE STATIC)
+else()
+    message("Configure to shared library")
+
+    set(BUILD_LIBRARY_TYPE SHARED)
+
+endif(BUILD_STATIC)
 
 add_subdirectory(src)
 target_include_directories(${PROJECT_NAME} PRIVATE src/include)
 
 
 
-set(BUILD_TYPE)
 
-if(BUILD_STATIC)
-    set(BUILD_TYPE, STATIC)
-else()
-    set(BUILD_TYPE, SHARED)
-
-endif(BUILD_STATIC)
 
 
 
