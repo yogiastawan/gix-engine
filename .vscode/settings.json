@@ -39,5 +39,13 @@
     },
     "editor.rulers": [
         80
+    ],
+    "cmake.configureArgs": [
+        "-DBUILD_EXAMPLE=ON",
+        "-DUSE_COMPILED_SHADER=OFF",
+        "-DSDL3_DIR=libs/SDL3-3.2.10",
+        "-DCGLM_DIR=libs/cglm-0.9.6",
+        "-DJSON_C_DIR=libs/json-c-0.18",
+        "-DSDL_SHADER_CROSS=/home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross"
     ]
 }

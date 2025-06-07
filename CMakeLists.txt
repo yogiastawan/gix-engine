@@ -5,39 +5,51 @@ project(gix-engine VERSION 0.1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 17)
 
-option(BUILD_EXAMPLE "Build examples" ON)
+option(BUILD_EXAMPLE "Build examples" OFF)
 option(BUILD_STATIC "Build static library" ON)
+option(USE_COMPILED_SHADER "Use system compiled shader" ON)
 
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLE}")
 message(STATUS "BUILD_STATIC: ${BUILD_STATIC}")
+message(STATUS "USE_COMPILED_SHADER: ${USE_COMPILED_SHADER}")
+message(STATUS "SHADER_FORMAT: ${SHADER_FORMAT}")
+message(STATUS "SDL_SHADER_CROSS: ${SDL_SHADER_CROSS}")
+message(STATUS "SDL3_DIR: ${SDL3_DIR}")
+message(STATUS "CGLM_DIR: ${CGLM_DIR}")
+message(STATUS "JSON_C_DIR: ${JSON_C_DIR}")
 
 if(NOT DEFINED SDL3_DIR)
-    set(SDL3_DIR libs/SDL3-3.2.10)
+    # set(SDL3_DIR libs/SDL3-3.2.10)
+    message(FATAL_ERROR "SDL3_DIR not defined. Set this with location of libs SDL3.")
 endif()
 
 if(NOT DEFINED CGLM_DIR)
-    set(CGLM_DIR libs/cglm-0.9.6)
+    message(FATAL_ERROR "CGLM_DIR not defined. Set this with location of libs cglm.")
+
 endif()
 
 if(NOT DEFINED JSON_C_DIR)
-    set(JSON_C_DIR libs/json-c-0.18)
+    message(FATAL_ERROR "JSON_C_DIR not defined. Set this with location of libs json-c.")
+
 endif()
 
-# add libs
+set(_saved_CMAKE_MESSAGE_LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
+set(CMAKE_MESSAGE_LOG_LEVEL NOTICE)
 add_subdirectory(${SDL3_DIR} EXCLUDE_FROM_ALL)
 add_subdirectory(${CGLM_DIR} EXCLUDE_FROM_ALL)
 add_subdirectory(${JSON_C_DIR} EXCLUDE_FROM_ALL)
+set(CMAKE_MESSAGE_LOG_LEVEL ${_saved_CMAKE_MESSAGE_LOG_LEVEL})
+
+# add libs
+
 
 #version
 add_compile_definitions(GIX_ENGINE_MAJOR_VERSION=${PROJECT_VERSION_MAJOR})
 add_compile_definitions(GIX_ENGINE_MINOR_VERSION=${PROJECT_VERSION_MINOR})
 add_compile_definitions(GIX_ENGINE_PATCH_VERSION=${PROJECT_VERSION_PATCH})
 add_compile_definitions(GIX_ENGINE_VERSION="${PROJECT_VERSION}")
-# system shader build output
-if(NOT DEFINED GIX_ENGINE_SHADER_DIR)
-    set(GIX_ENGINE_SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/gix_engine_shader)
-    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_DIR}")
-endif()
+
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/Wall)
@@ -53,46 +65,74 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(BUILD_DEBUG)
 endif()
 
+# system shader build output
+if(NOT USE_COMPILED_SHADER)
+    message(STATUS "Using precompiled shader file.")
+    if(NOT DEFINED GIX_ENGINE_SHADER_DIR_OUT)
+        set(GIX_ENGINE_SHADER_DIR_OUT ${CMAKE_CURRENT_BINARY_DIR}/gix_engine_shader)
+        message(WARNING "GIX_ENGINE_SHADER_DIR_OUT not defined. Default: system shader file will be compiled to ${GIX_ENGINE_SHADER_DIR_OUT}")
+        add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_DIR_OUT}")
+    endif()
+else()
+    message(STATUS "Using compiled shader file.")
+    message(WARNING "GIX_ENGINE_SHADER_DIR not defined. Default: compiled system shader located in ${PROJECT_SOURCE_DIR}/gix_engine_shader")
+    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${PROJECT_SOURCE_DIR}/gix_engine_shader")
+
+endif()
+
 # Backend Shader format choose
 if(NOT DEFINED SHADER_FORMAT)
+    message(WARNING "SHADER_FORMAT not defined. Default: GIX_VULKAN. Option: GIX_VULKAN, GIX_MSL, GIX_DXIL.")
     add_compile_definitions(GIX_VULKAN)
 else()
     add_compile_definitions(${SHADER_FORMAT})
 endif()
 
 # shadercross path
-if(NOT DEFINED SDL_SHADER_CROSS)
-    message("Please set file SDLShadercross file using -DSDL_SHADER_CROSS=\"path\"")
-    set(SDL_SHADER_CROSS /home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross)
+if(NOT USE_COMPILED_SHADER)
+    if(NOT DEFINED SDL_SHADER_CROSS)
+        message(FATAL_ERROR "SDL_SHADER_CROSS is not defined. Please set path of SDLShadercross.")
+    endif()
+
+    set(SCRIPT_COMPILE_SHADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh)
 endif()
-
-
-if(BUILD_EXAMPLE)
-    add_subdirectory(examples)
-endif(BUILD_EXAMPLE)
 
 # library type
 if(BUILD_STATIC)
-    message("Configure to STATIC library. To create SHARED Library use: -DBUILD_STATIC=OFF")
     set(BUILD_LIBRARY_TYPE STATIC)
 else()
-    message("Configure to SHARED library")
-
     set(BUILD_LIBRARY_TYPE SHARED)
-
 endif(BUILD_STATIC)
 
 add_subdirectory(src)
-target_include_directories(${PROJECT_NAME} PUBLIC src/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+
+if(BUILD_EXAMPLE)
+    if(NOT DEFINED SDL_SHADER_CROSS)
+        message(FATAL_ERROR "SDL_SHADER_CROSS is not defined. Please set path of SDLShadercross.")
+    endif()
+
+    set(SCRIPT_COMPILE_SHADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh)
+    add_subdirectory(examples)
+endif(BUILD_EXAMPLE)
 
 include(CTest)
 enable_testing()
 
+# PACKAGING
+
+install(FILES
+    ${PROJECT_SOURCE_DIR}/compile-shader.sh
+    ${PROJECT_SOURCE_DIR}/CMakeLists.txt
+    DESTINATION .
+)
 
 install(DIRECTORY
-    src DESTINATION .)
+    ${PROJECT_SOURCE_DIR}/src DESTINATION .)
 install(DIRECTORY
-    examples DESTINATION .)
+    ${PROJECT_SOURCE_DIR}/examples DESTINATION .)
+install(DIRECTORY
+    ${PROJECT_BINARY_DIR}/gix_engine_shader DESTINATION .)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
