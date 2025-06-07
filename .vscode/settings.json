@@ -41,7 +41,7 @@
         80
     ],
     "cmake.configureArgs": [
-        "-DBUILD_EXAMPLE=ON",
+        "-DBUILD_EXAMPLES=ON",
         "-DUSE_COMPILED_SHADER=OFF",
         "-DSDL3_DIR=libs/SDL3-3.2.10",
         "-DCGLM_DIR=libs/cglm-0.9.6",
