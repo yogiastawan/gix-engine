@@ -53,7 +53,7 @@ To use gix-engine we need define some option and variable. Below is list of opti
    # link static library
    target_link_libraries(your_roject gix-engine-static)
    # use this to link shared library instead
-   # target_link_libraries(your_roject gix-engine-shared)
+   # target_link_libraries(your_roject gix-engine)
 
    ```
 2. Configure and build your project

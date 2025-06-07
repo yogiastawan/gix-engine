@@ -19,16 +19,10 @@ if(BUILD_STATIC)
     add_dependencies(${PROJECT_NAME}-static compile_shader)
 endif()
 if(BUILD_SHARED)
-    add_library(${PROJECT_NAME}-shared SHARED ${srcs})
-    target_link_libraries(${PROJECT_NAME}-shared SDL3::SDL3 cglm json-c ${MATH})
-    set_target_properties(${PROJECT_NAME}-shared
-        PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
-        OUTPUT_NAME ${PROJECT_NAME})
-    add_dependencies(${PROJECT_NAME}-shared compile_shader)
-endif()
-
-if(BUILD_EXAMPLES)
     add_library(${PROJECT_NAME} SHARED ${srcs})
     target_link_libraries(${PROJECT_NAME} SDL3::SDL3 cglm json-c ${MATH})
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+        OUTPUT_NAME ${PROJECT_NAME})
     add_dependencies(${PROJECT_NAME} compile_shader)
 endif()

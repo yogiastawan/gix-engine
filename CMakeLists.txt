@@ -21,6 +21,10 @@ message(STATUS "SDL3_DIR: ${SDL3_DIR}")
 message(STATUS "CGLM_DIR: ${CGLM_DIR}")
 message(STATUS "JSON_C_DIR: ${JSON_C_DIR}")
 
+if(NOT BUILD_STATIC AND NOT BUILD_SHARED)
+    message(FATAL_ERROR "BUILD_STATIC and BUILD_SHARED set to off. Please set to ON one or both variables")
+endif()
+
 if(NOT DEFINED SDL3_DIR)
     message(FATAL_ERROR "SDL3_DIR not defined. Set this with location of libs SDL3.")
 endif()
@@ -38,6 +42,8 @@ endif()
 set(_saved_CMAKE_MESSAGE_LOG_LEVEL ${CMAKE_MESSAGE_LOG_LEVEL})
 set(CMAKE_MESSAGE_LOG_LEVEL NOTICE)
 add_subdirectory(${SDL3_DIR} EXCLUDE_FROM_ALL)
+set(CGLM_STATIC ON)
+set(CGLM_SHARED OFF)
 add_subdirectory(${CGLM_DIR} EXCLUDE_FROM_ALL)
 add_subdirectory(${JSON_C_DIR} EXCLUDE_FROM_ALL)
 set(CMAKE_MESSAGE_LOG_LEVEL ${_saved_CMAKE_MESSAGE_LOG_LEVEL})
@@ -99,18 +105,12 @@ if(NOT USE_COMPILED_SHADER)
 endif()
 
 # library type
-if(BUILD_STATIC)
-    set(BUILD_LIBRARY_STATIC STATIC)
-else()
-    set(BUILD_LIBRARY_TYPE SHARED)
-endif(BUILD_STATIC)
-
 add_subdirectory(src)
 if(BUILD_STATIC)
     target_include_directories(${PROJECT_NAME}-static PUBLIC ${PROJECT_SOURCE_DIR}/src/include)
 endif()
 if(BUILD_SHARED)
-    target_include_directories(${PROJECT_NAME}-shared PUBLIC ${PROJECT_SOURCE_DIR}/src/include)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/include)
 endif()
 
 if(BUILD_EXAMPLES)
@@ -119,7 +119,6 @@ if(BUILD_EXAMPLES)
     endif()
     set(SCRIPT_COMPILE_SHADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh)
 
-    target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/include)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLES)
 
@@ -127,7 +126,6 @@ include(CTest)
 enable_testing()
 
 # PACKAGING
-
 install(FILES
     ${PROJECT_SOURCE_DIR}/compile-shader.sh
     ${PROJECT_SOURCE_DIR}/CMakeLists.txt
