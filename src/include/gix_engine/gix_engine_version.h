@@ -6,18 +6,26 @@ extern "C" {
 #endif
 
 #ifndef GIX_ENGINE_MAJOR_VERSION
-#define GIX_ENGINE_MAJOR_VERSION 0
+#define GIX_ENGINE_MAJOR_VERSION \
+    Error:                       \
+    Major version not defined
 #endif
 #ifndef GIX_ENGINE_MINOR_VERSION
-#define GIX_ENGINE_MINOR_VERSION 1
+#define GIX_ENGINE_MAJOR_VERSION \
+    Error:                       \
+    Minor version not defined
 #endif
 
 #ifndef GIX_ENGINE_PATCH_VERSION
-#define GIX_ENGINE_PATCH_VERSION 0
+#define GIX_ENGINE_MAJOR_VERSION \
+    Error:                       \
+    Patch version not defined
 #endif
 
 #ifndef GIX_ENGINE_VERSION
-#define GIX_ENGINE_VERSION "0.1.0"
+#define GIX_ENGINE_VERSION \
+    Error:                 \
+    Version not defined
 #endif
 
 #define GIX_ENGINE_VERSION_NUM                                            \
