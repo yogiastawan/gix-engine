@@ -428,7 +428,7 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
                           uniform.numb_instance, 0, 0);
 }
 
-void __internal_gix_scene_set_3d_grid_color(GixScene* scene, Uint8 color[4]) {
+void __internal_gix_scene_set_3d_grid_color(GixScene* scene, const Uint8 color[4]) {
     SDL_memcpy(scene->priv->grid_3d_color, color, sizeof(Uint8) * 4);
 }
 #endif

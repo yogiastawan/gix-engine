@@ -29,7 +29,8 @@ extern "C" {
  * @param scene_ptr GixScene pointer
  * @param line_length_u32 length of each line grid in format `unsigned int`
  *
- * @note Call this on setup. Size of each grid created is 1x1 (1 meter * 1 meter)
+ * @note Call this on setup. Size of each grid created is 1x1 (1 meter * 1
+ * meter)
  */
 #define gix_scene_setup_3d_grid(scene_ptr, line_length_u32) \
     (__internal_gix_scene_setup_3d_grid)(scene_ptr, line_length_u32)
@@ -54,9 +55,10 @@ extern "C" {
  * @param scene_ptr GixScene pointer
  * @param color_u8_4 Color in array `unsigned int[4]`
  *
+ * @note Call this function before call `gix_scene_setup_3d_grid`
  */
 #define gix_scene_set_3d_grid_color(scene_ptr, color_u8_4) \
-    __internal_gix_scene_set_3d_grid_color(scene_ptr, color_u8_4)
+    (__internal_gix_scene_set_3d_grid_color)(scene_ptr, color_u8_4)
 #else
 #define gix_scene_setup_3d_grid(...)
 #define gix_scene_draw_3d_grid(...)
@@ -193,7 +195,8 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
     Error:                                     \
     use function gix_scene_draw_3d_grid instead
 
-void __internal_gix_scene_set_3d_grid_color(GixScene* scene, Uint8 color[4]);
+void __internal_gix_scene_set_3d_grid_color(GixScene* scene,
+                                            const Uint8 color[4]);
 #define __internal_gix_scene_set_3d_grid_color(...) \
     Error:                                          \
     use function gix_scene_set_3d_grid_color instead
