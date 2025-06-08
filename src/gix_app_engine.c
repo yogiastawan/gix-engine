@@ -54,10 +54,6 @@ typedef struct Grid3DUniform {
     Uint32 numb_instance;
 } Grid3DUniform;
 
-#define INTR_SHADER_VERTEX ""
-#define INTR_SHADER_FRAG ""
-#define INTR_SHADER_VERTEX_JSON ""
-#define INTR_SHADER_FRAG_JSON ""
 #endif
 
 static GixApp* gix_app_new(const char* name);
@@ -211,7 +207,7 @@ void __internal_gix_scene_setup_3d_grid(GixScene* scene, vec2 x_start_end,
     // create vertex bufer
     SDL_GPUBufferCreateInfo vertex_buffer_info = {
         .usage = SDL_GPU_BUFFERUSAGE_VERTEX,
-        .size = sizeof(VertexGrid3DLine),
+        .size = sizeof(VertexGrid3DLine) * GIX_ENGINE_NUM_GRID_3D_VERTEX,
     };
     scene->priv->vertex_grid_3d_buffer =
         SDL_CreateGPUBuffer(device, &vertex_buffer_info);
@@ -543,7 +539,7 @@ void gix_app_set_window_position(GixApp* app, int x, int y) {
 
 void gix_app_set_window_resizeable(GixApp* app, bool resizeable) {
     SDL_SetWindowResizable(app->window, resizeable);
-    gix_log_error("Set window resizeable");
+    gix_log("Set window resizeable");
 }
 
 void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {

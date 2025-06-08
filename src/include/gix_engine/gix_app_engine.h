@@ -8,8 +8,8 @@
 extern "C" {
 #endif
 
-#ifndef ENGINE_SHADER_OUT
-#define ENGINE_SHADER_OUT
+#ifndef GIX_ENGINE_SHADER_DIR
+#define GIX_ENGINE_SHADER_DIR System Error.GIX_ENGINE_SHADER_DIR must be defined
 #endif
 
 #define GIX_ENGINE_NUMB_GRID_3D_LINE_DEFAULT 50
