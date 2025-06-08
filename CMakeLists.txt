@@ -5,6 +5,10 @@ project(gix-engine VERSION 0.1.0 LANGUAGES C)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 17)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE debug)
+endif()
+
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_STATIC "Build static library" ON)
 option(BUILD_SHARED "Build static library" ON)
@@ -15,7 +19,26 @@ message(STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLES}")
 message(STATUS "BUILD_STATIC: ${BUILD_STATIC}")
 message(STATUS "BUILD_SHARED: ${BUILD_SHARED}")
 message(STATUS "USE_COMPILED_SHADER: ${USE_COMPILED_SHADER}")
-message(STATUS "SHADER_FORMAT: ${SHADER_FORMAT}")
+if(NOT USE_COMPILED_SHADER)
+    if(NOT DEFINED GIX_ENGINE_SHADER_DIR_OUT)
+        message(STATUS "GIX_ENGINE_SHADER_DIR_OUT: Default")
+    else()
+        message(STATUS "GIX_ENGINE_SHADER_DIR_OUT: ${GIX_ENGINE_SHADER_DIR_OUT}")
+    endif()
+
+else()
+    if(NOT DEFINED GIX_ENGINE_SHADGIX_ENGINE_SHADER_COMPILED_DIRER_DIR_OUT)
+        message(STATUS "GIX_ENGINE_SHADER_COMPILED_DIR: Default")
+    else()
+        message(STATUS "GIX_ENGINE_SHADER_COMPILED_DIR: ${GIX_ENGINE_SHADER_COMPILED_DIR}")
+    endif()
+endif()
+
+if(NOT DEFINED SHADER_FORMAT)
+    message(STATUS "SHADER_FORMAT: Default")
+else()
+    message(STATUS "SHADER_FORMAT: ${SHADER_FORMAT}")
+endif()
 message(STATUS "SDL_SHADER_CROSS: ${SDL_SHADER_CROSS}")
 message(STATUS "SDL3_DIR: ${SDL3_DIR}")
 message(STATUS "CGLM_DIR: ${CGLM_DIR}")
@@ -48,8 +71,6 @@ add_subdirectory(${CGLM_DIR} EXCLUDE_FROM_ALL)
 add_subdirectory(${JSON_C_DIR} EXCLUDE_FROM_ALL)
 set(CMAKE_MESSAGE_LOG_LEVEL ${_saved_CMAKE_MESSAGE_LOG_LEVEL})
 
-# add libs
-
 
 #version
 add_compile_definitions(GIX_ENGINE_MAJOR_VERSION=${PROJECT_VERSION_MAJOR})
@@ -78,12 +99,17 @@ if(NOT USE_COMPILED_SHADER)
     if(NOT DEFINED GIX_ENGINE_SHADER_DIR_OUT)
         set(GIX_ENGINE_SHADER_DIR_OUT ${CMAKE_CURRENT_BINARY_DIR}/gix_engine_shader)
         message(WARNING "GIX_ENGINE_SHADER_DIR_OUT not defined. Default: system shader file will be compiled to ${GIX_ENGINE_SHADER_DIR_OUT}")
-        add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_DIR_OUT}")
     endif()
+    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_DIR_OUT}")
+
+
 else()
     message(STATUS "Using compiled shader file.")
-    message(STATUS "GIX_ENGINE_SHADER_DIR not defined. Using default GIX_ENGINE_SHADER_DIR in ${PROJECT_SOURCE_DIR}/gix_engine_shader")
-    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${PROJECT_SOURCE_DIR}/gix_engine_shader")
+    if(NOT DEFINED GIX_ENGINE_SHADER_COMPILED_DIR)
+        message(STATUS "GIX_ENGINE_SHADER_DIR not defined. Using default GIX_ENGINE_SHADER_DIR in ${PROJECT_SOURCE_DIR}/gix_engine_shader")
+        set(GIX_ENGINE_SHADER_COMPILED_DIR ${PROJECT_SOURCE_DIR}/gix_engine_shader)
+    endif()
+    add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_COMPILED_DIR}")
 
 endif()
 

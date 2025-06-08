@@ -10,23 +10,24 @@ Libraries that used in gix-engine:
 # How to use
 To use gix-engine we need define some option and variable. Below is list of options and variable we can set.
 
-| Name                  | Default Value                | Desc                                                                                                                            |
-| --------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| BUILD_EXAMPLES        | OFF                          | Set ON to create examples                                                                                                       |
-| BUILD_STATIC          | ON                           | Create static library                                                                                                           |
-| BUILD_SHARED          | ON                           | Create shared library                                                                                                           |
-| USE_COMPILED_SHADER   | ON                           | Use compiled shader. Set OFF to compile shader when build library                                                               |
-| SHADER_FORMAT         | GIX_VULKAN                   | Format shader that specific to platform. Value: GIX_VULKAN (for Linux,Android), GIX_MSL (for Mac, Ios), GIX_DXIL (for Windows). |
-| SDL_SHADER_CROSS      |                              | Set path of SDL3 Shadercross. Note: Must be set if BUILD_EXAMPLES=ON or USE_COMPILED_SHADER=ON                                  |
-| SDL3_DIR              |                              | Path location of SDL3. Note: Must be set                                                                                        |
-| CGLM_DIR              |                              | Path location of cglm. Note: Must be set                                                                                        |
-| JSON_C_DIR            |                              | Path location of json-c. Note: Must be set                                                                                      |
-| GIX_ENGINE_SHADER_DIR | gix-engine/gix_engine_shader | Path of system shader directory location                                                                                        |
+| Name                           | Default Value                              | Desc                                                                                                                            |
+| ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| BUILD_EXAMPLES                 | OFF                                        | Set ON to create examples                                                                                                       |
+| BUILD_STATIC                   | ON                                         | Create static library                                                                                                           |
+| BUILD_SHARED                   | ON                                         | Create shared library                                                                                                           |
+| USE_COMPILED_SHADER            | ON                                         | Use compiled shader. Set OFF to compile shader when build library                                                               |
+| SHADER_FORMAT                  | GIX_VULKAN                                 | Format shader that specific to platform. Value: GIX_VULKAN (for Linux,Android), GIX_MSL (for Mac, Ios), GIX_DXIL (for Windows). |
+| SDL_SHADER_CROSS               |                                            | Set path of SDL3 Shadercross. Note: Must be set if BUILD_EXAMPLES=ON or USE_COMPILED_SHADER=ON                                  |
+| SDL3_DIR                       |                                            | Directory location of SDL3. Note: Must be set                                                                                   |
+| CGLM_DIR                       |                                            | Directory location of cglm. Note: Must be set                                                                                   |
+| JSON_C_DIR                     |                                            | Directory location of json-c. Note: Must be set                                                                                 |
+| GIX_ENGINE_SHADER_COMPILED_DIR | gix-engine/gix_engine_shader               | Directory of system shader directory location. Only used if USE_COMPILED_SHADER=ON                                              |
+| GIX_ENGINE_SHADER_DIR_OUT      | path_of_gix-engine_build/gix_engine_shader | Directory of compiled system shader will be stored. Oly used if          USE_COMPILED_SHADER=OFF                                |
 
 ## Build gix-engine
 1. Configure gix-engine to folder build
     ```sh
-    cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_SHARED=OFF -DBUILD_EXAMPLES=ON -DUSE_COMPILED_SHADER=OFF -DSDL3_DIR=libs/SDL3-3.2.10 -DCGLM_DIR=libs/cglm-0.9.6 -DJSON_C_DIR=libs/json-c-0.18 -DSDL_SHADER_CROSS=bin/shadercross -S./ -B./build
+    cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_SHARED=OFF -DBUILD_EXAMPLES=ON -DUSE_COMPILED_SHADER=OFF -DGIX_ENGINE_SHADER_DIR_OUT={PROJECT_SOURCE_DIR}/gix-engine-shader -DSDL3_DIR=libs/SDL3-3.2.10 -DCGLM_DIR=libs/cglm-0.9.6 -DJSON_C_DIR=libs/json-c-0.18 -DSDL_SHADER_CROSS=bin/shadercross -S./ -B./build
     ```
 2. Build gix-engine
    ```sh
@@ -40,6 +41,7 @@ To use gix-engine we need define some option and variable. Below is list of opti
    set(BUILD_SHARED OFF)
    set(BUILD_EXAMPLES ON)
    set(USE_COMPILED_SHADER OFF)
+   set(GIX_ENGINE_SHADER_DIR_OUT ${PROJECT_SOURCE_DIR}/gix-engine-shader-system)
    set(SDL3_DIR libs/SDL3-3.2.10)
    set(CGLM_DIR libs/cglm-0.9.6)
    set(JSON_C_DIR libs/json-c-0.18)
@@ -48,7 +50,7 @@ To use gix-engine we need define some option and variable. Below is list of opti
    add_subdirectory(path/gix-engine)
 
    # your project target project
-   # add_executable(your_roject srcs.c)
+   add_executable(your_roject srcs.c)
 
    # link static library
    target_link_libraries(your_roject gix-engine-static)
