@@ -2,7 +2,7 @@
 
 #include <cglm/cglm.h>
 
-#define NUMB_CUBE 1000
+#define NUMB_CUBE 1
 
 typedef struct _Camera {
     vec3 position;
@@ -82,7 +82,9 @@ SDL_AppResult init(GixScene *self) {
     gix_log("get size %ux%u", scene->w, scene->h);
     init_my_scene(scene);
 
-    // get window size
+    // setup grid
+    gix_scene_set_3d_grid_color(self, gix_array(Uint8[4], {150, 200, 150, 255}));
+    gix_scene_setup_3d_grid(self, (Uint32)scene->camera.position[2]);
 
     // create vertex buffer
     SDL_GPUBufferCreateInfo vertex_buffer_info = {
@@ -341,6 +343,10 @@ SDL_AppResult draw(GixScene *self) {
 
         SDL_GPURenderPass *render_pass = SDL_BeginGPURenderPass(
             cmd, &color_target_info, 1, &depth_target_info);
+
+        // Draw 3D grid
+        gix_scene_draw_3d_grid(self, cmd, render_pass, scene->view_proj);
+
         SDL_BindGPUGraphicsPipeline(render_pass, self->graphic_pipeline[0]);
         // bind vertex buffer
         SDL_GPUBufferBinding vertex_buffer_binding[1] = {
@@ -466,7 +472,7 @@ static void init_my_scene(MyScene *scene) {
                sizeof(vec4) * scene->numb_face_color);
 
     // set camera
-    glm_vec3_copy((vec3){0.f, 0.f, 25.f}, scene->camera.position);
+    glm_vec3_copy((vec3){0.f, 2.f, 5.f}, scene->camera.position);
     glm_vec3_copy((vec3){0.f, 0.f, 0.f}, scene->camera.target);
     // set vp;
     mat4 init = GLM_MAT4_IDENTITY_INIT;
@@ -488,16 +494,16 @@ static void init_my_scene(MyScene *scene) {
         float b = (float)SDL_rand(scene->h);
 
         float y = (float)(b) / 60.f;
-        gix_log("x: %f=>%f", a, x);
-        gix_log("y: %f=>%f", b, y);
+        // gix_log("x: %f=>%f", a, x);
+        // gix_log("y: %f=>%f", b, y);
         vec3 pos = {
-            x,
-            y,
-            (float)(SDL_rand(800)) / 80.0f,
+            0,
+            0.5f,  // 0.5 to translate to 0 position
+            0,
         };
         glm_translate(scene->model_matrix[i], pos);
-        if (i % 5) {
-            scene->is_rotate[i] = true;
+        if (!(i % 5)) {
+            scene->is_rotate[i] = false;
         }
     }
 }
