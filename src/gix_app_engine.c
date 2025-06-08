@@ -9,7 +9,6 @@
 
 #undef __internal_gix_scene_setup_3d_grid
 #undef __internal_gix_scene_draw_3d_grid
-#undef __internal_gix_scene_set_3d_grid_numb_line
 #undef __internal_gix_scene_set_3d_grid_color
 
 struct _GixApp {
@@ -46,7 +45,6 @@ typedef struct _VertexGrid3DLine {
 
 typedef struct _Line3DData {
     float start_end[2];
-    uint increment;
 } Line3DData;
 
 typedef struct Grid3DUniform {
@@ -195,11 +193,15 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
 }
 
 #ifdef BUILD_DEBUG
-void __internal_gix_scene_setup_3d_grid(GixScene* scene, vec2 x_start_end,
-                                        vec2 z_start_end) {
+void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint32 length_side) {
     if (scene->priv->is_grid_3d_inited) {
         return;
     }
+    Uint32 length =
+        length_side +
+        (length_side % 2);  // if length_side is odd then add 1 meter more
+
+    scene->priv->grid_3d_numb_line = length + 1;
 
     SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
     SDL_Window* window = gix_app_get_window(scene->app);
@@ -352,15 +354,11 @@ void __internal_gix_scene_setup_3d_grid(GixScene* scene, vec2 x_start_end,
     SDL_memcpy(transfer_address, &data,
                sizeof(VertexGrid3DLine) * GIX_ENGINE_NUM_GRID_3D_VERTEX);
     // copy storage buffer
+    float start = (0.f - (float)length / 2.f);
+    float end = ((float)length / 2.f);
     Line3DData line_data[GIX_ENGINE_NUM_GRID_3D_DATA] = {
-        {
-            .start_end = {z_start_end[0], z_start_end[1]},
-            .increment = 1,
-        },
-        {
-            .start_end = {x_start_end[0], x_start_end[1]},
-            .increment = 1,
-        },
+        {.start_end = {start, end}},
+        {.start_end = {end, start}},
     };
     SDL_memcpy((Uint8*)transfer_address +
                    (sizeof(VertexGrid3DLine) * GIX_ENGINE_NUM_GRID_3D_VERTEX),
@@ -417,8 +415,8 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
     SDL_GPUBuffer* vertex_storage_buffer[1] = {
         scene->priv->line_grid_3d_buffer,
     };
-
     SDL_BindGPUVertexStorageBuffers(render_pass, 0, vertex_storage_buffer, 1);
+
     // push uniform
     Grid3DUniform uniform = {0};
     glm_mat4_copy(vp, uniform.vp);
@@ -428,11 +426,6 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
     // draw
     SDL_DrawGPUPrimitives(render_pass, GIX_ENGINE_NUM_GRID_3D_VERTEX,
                           uniform.numb_instance, 0, 0);
-}
-
-void __internal_gix_scene_set_3d_grid_numb_line(GixScene* scene,
-                                                Uint32 numb_line) {
-    scene->priv->grid_3d_numb_line = numb_line;
 }
 
 void __internal_gix_scene_set_3d_grid_color(GixScene* scene, Uint8 color[4]) {

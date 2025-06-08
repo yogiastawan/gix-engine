@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #define GIX_ENGINE_NUMB_GRID_3D_LINE_DEFAULT 50
-#define GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT (Uint8[4]){100, 100, 100, 255}
+#define GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT (Uint8[4]){200, 200, 200, 255}
 
 #define gix_scene_init(scene) scene->scene_init(scene)
 #define gix_scene_event(scene, event) scene->scene_event(scene, event)
@@ -23,18 +23,38 @@ extern "C" {
 #define gix_scene_quit(scene) scene->scene_quit(scene)
 
 #ifdef BUILD_DEBUG
-#define gix_scene_setup_3d_grid(scene_ptr, x_start_end_vec2, z_start_end_vec2) \
-    (__internal_gix_scene_setup_3d_grid)(scene_ptr, x_start_end_vec2,          \
-                                         z_start_end_vec2)
+/**
+ * @brief Setup 3D grid
+ *
+ * @param scene_ptr GixScene pointer
+ * @param line_length_u32 length of each line grid in format `unsigned int`
+ *
+ * @note Call this on setup. Size of each grid created is 1x1 (1 meter * 1 meter)
+ */
+#define gix_scene_setup_3d_grid(scene_ptr, line_length_u32) \
+    (__internal_gix_scene_setup_3d_grid)(scene_ptr, line_length_u32)
 
+/**
+ * @brief Draw 3D grid
+ *
+ * @param scene_ptr GixScene pointer
+ * @param cmd_buffer_ptr SDL_GPUCommmandBuffer pointer
+ * @param render_pass_ptr SDL_RenderPass pointer
+ *
+ * @note Call this function inside draw loop
+ */
 #define gix_scene_draw_3d_grid(scene_ptr, cmd_buffer_ptr, render_pass_ptr, \
                                vp_mat4)                                    \
     (__internal_gix_scene_draw_3d_grid)(scene_ptr, cmd_buffer_ptr,         \
                                         render_pass_ptr, vp_mat4)
 
-#define gix_scene_set_3d_grid_numb_line(scene_ptr, numb_line_u32) \
-    (__internal_gix_scene_set_3d_grid_numb_line)(scene_ptr, numb_line_u32)
-
+/**
+ * @brief Set color of line 3D grid
+ *
+ * @param scene_ptr GixScene pointer
+ * @param color_u8_4 Color in array `unsigned int[4]`
+ *
+ */
 #define gix_scene_set_3d_grid_color(scene_ptr, color_u8_4) \
     __internal_gix_scene_set_3d_grid_color(scene_ptr, color_u8_4)
 #else
@@ -69,17 +89,17 @@ struct _GixScene {
     /// app bind
     GixApp* app;
 
-    /// list of graphic pipline
+    /// List of graphic pipline
     SDL_GPUGraphicsPipeline** graphic_pipeline;
     /// Number of graphics pipeline
     Uint8 numb_graphic_pipeline;
 
-    // list of compute pipline
+    // List of compute pipline
     SDL_GPUGraphicsPipeline** compute_pipeline;
     /// Number of compute pipeline
     Uint8 numb_compute_pipeline;
 
-    // implement function
+    // Implement function
     SceneInit scene_init;
     SceneEvent scene_event;
     SceneUpdate scene_update;
@@ -162,8 +182,7 @@ static inline void gix_scene_alloc_compute_pipeline(GixScene* scene,
 }
 
 #ifdef BUILD_DEBUG
-void __internal_gix_scene_setup_3d_grid(GixScene* scene, vec2 x_start_end,
-                                        vec2 z_start_end);
+void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint32 lenght_side);
 #define __internal_gix_scene_setup_3d_grid(...) \
     Error:                                      \
     use function gix_scene_setup_3d_grid instead
@@ -173,13 +192,6 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
 #define __internal_gix_scene_draw_3d_grid(...) \
     Error:                                     \
     use function gix_scene_draw_3d_grid instead
-
-void __internal_gix_scene_set_3d_grid_numb_line(GixScene* scene,
-                                                Uint32 numb_line);
-
-#define __internal_gix_scene_set_3d_grid_numb_line(...) \
-    Error:                                              \
-    use function gix_scene_set_3d_grid_numb_line instead
 
 void __internal_gix_scene_set_3d_grid_color(GixScene* scene, Uint8 color[4]);
 #define __internal_gix_scene_set_3d_grid_color(...) \
