@@ -101,8 +101,6 @@ if(NOT USE_COMPILED_SHADER)
         message(STATUS "GIX_ENGINE_SHADER_DIR_OUT not defined. Default: system shader file will be compiled to ${GIX_ENGINE_SHADER_DIR_OUT}")
     endif()
     add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_DIR_OUT}")
-
-
 else()
     message(STATUS "Using compiled shader file.")
     if(NOT DEFINED GIX_ENGINE_SHADER_COMPILED_DIR)
@@ -110,7 +108,6 @@ else()
         message(STATUS "GIX_ENGINE_SHADER_DIR not defined. Using default GIX_ENGINE_SHADER_DIR in ${GIX_ENGINE_SHADER_COMPILED_DIR}")
     endif()
     add_compile_definitions(GIX_ENGINE_SHADER_DIR="${GIX_ENGINE_SHADER_COMPILED_DIR}")
-
 endif()
 
 # Backend Shader format choose
