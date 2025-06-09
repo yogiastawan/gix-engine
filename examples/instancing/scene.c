@@ -2,7 +2,7 @@
 
 #include <cglm/cglm.h>
 
-#define NUMB_CUBE 1
+#define NUMB_CUBE 1000
 
 typedef struct _Camera {
     vec3 position;
@@ -83,8 +83,9 @@ SDL_AppResult init(GixScene *self) {
     init_my_scene(scene);
 
     // setup grid
-    gix_scene_set_3d_grid_color(self, gix_array(Uint8[4], {150, 200, 150, 255}));
-    gix_scene_setup_3d_grid(self, (Uint32)scene->camera.position[2]);
+    gix_scene_set_3d_grid_color(self,
+                                gix_array(Uint8[4], {150, 200, 150, 255}));
+    gix_scene_setup_3d_grid(self, (Uint32)scene->camera.position[2] * 2);
 
     // create vertex buffer
     SDL_GPUBufferCreateInfo vertex_buffer_info = {
@@ -472,7 +473,7 @@ static void init_my_scene(MyScene *scene) {
                sizeof(vec4) * scene->numb_face_color);
 
     // set camera
-    glm_vec3_copy((vec3){0.f, 2.f, 5.f}, scene->camera.position);
+    glm_vec3_copy((vec3){0.f, 3.f, 25.f}, scene->camera.position);
     glm_vec3_copy((vec3){0.f, 0.f, 0.f}, scene->camera.target);
     // set vp;
     mat4 init = GLM_MAT4_IDENTITY_INIT;
@@ -497,13 +498,13 @@ static void init_my_scene(MyScene *scene) {
         // gix_log("x: %f=>%f", a, x);
         // gix_log("y: %f=>%f", b, y);
         vec3 pos = {
-            0,
-            0.5f,  // 0.5 to translate to 0 position
-            0,
+            x,
+            0.5f + y,  // 0.5 to translate to 0 position
+            (float)SDL_rand(600) / 60.f,
         };
         glm_translate(scene->model_matrix[i], pos);
         if (!(i % 5)) {
-            scene->is_rotate[i] = false;
+            scene->is_rotate[i] = true;
         }
     }
 }
