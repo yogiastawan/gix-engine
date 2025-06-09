@@ -1,3 +1,5 @@
+#include "shader_include/gix_engine_transform.hlsl"
+
 cbuffer VP : register(b0, space1)
 {
     float4x4 vp;
@@ -21,21 +23,6 @@ struct VertOutput
     float4 position : SV_POSITION;
     float4 color : TEXCOORD0;
 };
-
-float4x4 translate(float3 tr)
-{
-    // return float4x4(
-    //     1, 0, 0, 0,
-    //     0, 1, 0, 0,
-    //     0, 0, 1, 0,
-    //     tr.x, tr.y, tr.z, 1);
-
-    return float4x4(
-        1, 0, 0, tr.x,
-        0, 1, 0, tr.y,
-        0, 0, 1, tr.z,
-        0, 0, 0, 1);
-}
 
 VertOutput main(VertexInput input, uint vert_id : SV_VertexID, uint instance_id : SV_InstanceID)
 {
@@ -70,12 +57,9 @@ VertOutput main(VertexInput input, uint vert_id : SV_VertexID, uint instance_id 
     float current_vertex_z = lerp(start_z, end_z, (float)vert_id % 2);
 
     float3 tr = lerp(float3(offset, 0, 0), float3(0, 0, offset), (float)blend_factor);
-    float4x4 model_matrix = translate(tr);
 
-    float4 world_pos = mul(model_matrix, float4(current_vertex_x, 0, current_vertex_z, 1));
+    float4 world_pos = GixEngineTransform::translate(float4(current_vertex_x, 0, current_vertex_z, 1), float4(tr, 1));
     // clip position
-    // float4x4 mvp = mul(vp, model_matrix);
-    // output.position = mul(vp, float4(current_vertex_x, 0, current_vertex_z, 1));
     output.position = mul(vp, world_pos);
     return output;
 }
