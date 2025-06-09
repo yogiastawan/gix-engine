@@ -10,5 +10,5 @@
 - [ ] Create camera movement
 - [x] instancing rendering
 - [x] use json for shader info
-- [ ] add grid guide in 3d
-- [ ] add shader compiler for src
+- [x] add grid guide in 3d
+- [x] add shader compiler for src
