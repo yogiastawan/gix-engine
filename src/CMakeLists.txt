@@ -6,9 +6,13 @@ set(srcs gix_app_engine.c
     gix_shader.c
     gix_engine_version.c)
 
-add_custom_target(compile_shader
-    ALL
-    COMMAND COMMAND /bin/sh -c 'COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/shader DST=${GIX_ENGINE_SHADER_DIR_OUT} ${SCRIPT_COMPILE_SHADER_FILE}')
+set(SRC_COMPILE_SHADER_SCRIPT
+    "COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/shader DST=${GIX_ENGINE_SHADER_DIR_OUT} ${SCRIPT_COMPILE_SHADER_FILE}"
+    PARENT_SCOPE)
+
+# add_custom_target(compile_system_shader
+#     COMMAND /bin/sh -c "set -e; COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/shader DST=${GIX_ENGINE_SHADER_DIR_OUT} ${SCRIPT_COMPILE_SHADER_FILE}"
+#     VERBATIM)
 
 if(BUILD_STATIC)
     add_library(${PROJECT_NAME}-static STATIC ${srcs})
@@ -16,7 +20,10 @@ if(BUILD_STATIC)
     set_target_properties(${PROJECT_NAME}-static
         PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
         OUTPUT_NAME ${PROJECT_NAME})
-    add_dependencies(${PROJECT_NAME}-static compile_shader)
+    # compile shader
+    if(NOT USED_COMPILE_SHADER)
+        add_dependencies(${PROJECT_NAME}-static compile_shader)
+    endif()
 endif()
 if(BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${srcs})
@@ -24,5 +31,7 @@ if(BUILD_SHARED)
     set_target_properties(${PROJECT_NAME}
         PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
         OUTPUT_NAME ${PROJECT_NAME})
-    add_dependencies(${PROJECT_NAME} compile_shader)
+    if(NOT USED_COMPILE_SHADER)
+        add_dependencies(${PROJECT_NAME} compile_shader)
+    endif()
 endif()

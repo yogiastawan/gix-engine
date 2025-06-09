@@ -145,6 +145,11 @@ if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLES)
 
+add_custom_target(compile_shader
+    ALL
+    COMMAND sh -c "set -e; ${SRC_COMPILE_SHADER_SCRIPT} && ${EXAMPLES_COMPILE_SHADER_SCRIPT}"
+    VERBATIM)
+
 include(CTest)
 enable_testing()
 
@@ -160,7 +165,14 @@ install(DIRECTORY
 install(DIRECTORY
     ${PROJECT_SOURCE_DIR}/examples DESTINATION .)
 install(DIRECTORY
-    ${PROJECT_BINARY_DIR}/gix_engine_shader DESTINATION .)
+    ${PROJECT_BINARY_DIR}/gix_engine_shader DESTINATION shader)
+install(DIRECTORY
+    ${PROJECT_SOURCE_DIR}/src/shader/shader_include DESTINATION shader)
+
+# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-static
+#     ARCHIVE DESTINATION lib
+#     LIBRARY DESTINATION lib
+# )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
