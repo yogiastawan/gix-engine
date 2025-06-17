@@ -1,4 +1,4 @@
-#include "shader_include/gix_engine_transform.hlsl"
+#include "../shader_include/gix_engine_transform.hlsl"
 
 cbuffer VP : register(b0, space1)
 {
