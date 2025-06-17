@@ -12,3 +12,6 @@
 - [x] use json for shader info
 - [x] add grid guide in 3d
 - [x] add shader compiler for src
+- [ ] add collision
+- [ ] add sceletal animation
+- [ ] add sound
