@@ -1,27 +1,38 @@
-cbuffer MPV : register(b0, space1) {
-    float4x4 mpv : packoffset(c0);
+#include "../../../src/shader/shader_include/gix_engine_transform.hlsl"
+
+// uniform viewproj
+cbuffer MPV : register(b0, space1)
+{
+    float4x4 view_proj : packoffset(c0);
 };
 
-StructuredBuffer<float4> color : register(t0, space0);
+// array of color face
+StructuredBuffer<float4> color_faces : register(t0, space0);
 
-struct VertexInput {
+// array of rotate
+StructuredBuffer<float> rotate : register(t1, space0);
+
+struct VertexInput
+{
     float3 position : TEXCOORD0;
+    uint face_id : TEXCOORD1;
 };
 
-struct Output {
+struct Output
+{
     float4 color : TEXCOORD0;
     float4 position : SV_POSITION;
 };
 
-Output main(VertexInput input, uint id : SV_VERTEXID) {
+Output main(VertexInput input, uint id : SV_InstanceID)
+{
     Output output;
+    output.color = color_faces[input.face_id];
 
-    // set color
-    // get face index
-    uint index = id / 4;
-    output.color = color[index];
+    float4 world_space = GixEngineTransform::rotate_axis_y(float4(input.position, 1.0f), rotate[id]);
 
-    // set position
-    output.position = mul(mpv, float4(input.position, 1.0f));
+    // clip pos
+    output.position = mul(view_proj, world_space);
+
     return output;
 }
