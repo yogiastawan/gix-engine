@@ -6,7 +6,7 @@ set(srcs gix_app_engine.c
     gix_shader.c
     gix_engine_version.c)
 
-set(SRC_COMPILE_SHADER_SCRIPT
+set(CMD_COMPILE_SHADER
     "COMPILER=${SDL_SHADER_CROSS} SRC=${CMAKE_CURRENT_SOURCE_DIR}/shader/shader_internal DST=${GIX_ENGINE_SHADER_DIR_OUT} ${SCRIPT_COMPILE_SHADER_FILE}"
     PARENT_SCOPE)
 

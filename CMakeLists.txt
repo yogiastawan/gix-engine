@@ -127,6 +127,8 @@ if(NOT USE_COMPILED_SHADER)
     set(SCRIPT_COMPILE_SHADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/compile-shader.sh)
 endif()
 
+set(CMD_COMPILE_SHADER)
+
 # library type
 add_subdirectory(src)
 if(BUILD_STATIC)
@@ -147,7 +149,7 @@ endif(BUILD_EXAMPLES)
 
 add_custom_target(compile_shader
     ALL
-    COMMAND sh -c "set -e; ${SRC_COMPILE_SHADER_SCRIPT} && ${EXAMPLES_COMPILE_SHADER_SCRIPT}"
+    COMMAND sh -c "set -e; ${CMD_COMPILE_SHADER}"
     VERBATIM)
 
 include(CTest)
