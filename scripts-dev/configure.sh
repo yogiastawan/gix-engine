@@ -19,11 +19,12 @@ SHADERCROSS=/home/gihexdev00/Game-Dev/Program/SDL3_shadercross-3.0.0-linux-x64/b
 
 BUILD_EXAMPLES=ON
 
-if [[ $1 == "Release" ]]; then
-  BUILD_TYPE=Release
+if [[ ! -z "$1" ]]; then
+  BUILD_TYPE=$1
   BUILD_EXAMPLES=OFF
 fi
 
+rm -rf ./build
 mkdir -p ./build
 
 cmake -DCMAKE_BUILD_TYPE:STRING=${BUILD_TYPE} -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=${CC} -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++-18 -DBUILD_EXAMPLES=${BUILD_EXAMPLES} -DUSE_COMPILED_SHADER=OFF -DSDL3_DIR=${SDL3} -DCGLM_DIR=${cglm} -DJSON_C_DIR=${json_c} -DSDL_SHADER_CROSS=${SHADERCROSS} --no-warn-unused-cli -S${SOURCE} -B${BUILD_OUTPUT} 
