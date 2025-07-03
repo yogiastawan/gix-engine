@@ -64,7 +64,6 @@ static char* concate_str(const char* dir, const char* file_name) {
     size_t max_len = dir_len + name_len + 1;
     SDL_strlcpy(out, dir, max_len);
     SDL_strlcat(out, file_name, max_len);
-    gix_log("str_out=%s", out);
     return out;
 }
 
@@ -428,7 +427,8 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
                           uniform.numb_instance, 0, 0);
 }
 
-void __internal_gix_scene_set_3d_grid_color(GixScene* scene, const Uint8 color[4]) {
+void __internal_gix_scene_set_3d_grid_color(GixScene* scene,
+                                            const Uint8 color[4]) {
     SDL_memcpy(scene->priv->grid_3d_color, color, sizeof(Uint8) * 4);
 }
 #endif

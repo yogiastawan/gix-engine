@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Create array with type
+ *
+ * @param t type
+ * @param arr Array value
+ */
 #define gix_array(t, arr...) (t) arr
 
 #ifdef __cplusplus

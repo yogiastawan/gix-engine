@@ -1,5 +1,5 @@
-struct FragInput {
-    float4 color : TEXCOORD0;
+struct FragInput { 
+  float4 color : TEXCOORD0;
 };
 
 struct FragOutput {
@@ -10,4 +10,4 @@ FragOutput main(FragInput input) {
     FragOutput output;
     output.color = input.color;
     return output;
-}
+} 

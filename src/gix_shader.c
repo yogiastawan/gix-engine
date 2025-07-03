@@ -15,6 +15,8 @@ static GixInternalShaderInfo read_shader_info(const char* file);
 SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device, const char* shader_file,
                                const char* info_file,
                                SDL_GPUShaderStage shader_stage) {
+    gix_log("Load shader file: %s", shader_file);
+
     SDL_GPUShaderFormat backend_format = SDL_GetGPUShaderFormats(device);
     const char* entry_point = NULL;
 #ifdef GIX_VULKAN
