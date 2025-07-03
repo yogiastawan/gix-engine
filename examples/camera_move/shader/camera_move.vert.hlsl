@@ -12,6 +12,9 @@ StructuredBuffer<float4> color_faces : register(t0, space0);
 // array of rotate
 StructuredBuffer<float> rotate : register(t1, space0);
 
+//array of position
+StructuredBuffer<float4>position:register(t2,space0);
+
 struct VertexInput
 {
     float3 position : TEXCOORD0;
@@ -28,7 +31,7 @@ Output main(VertexInput input, uint id : SV_InstanceID)
 {
     Output output;
     output.color = color_faces[input.face_id];
-
+    GixEngineTransform::translate(float4(input.position,1.0f),position[id]);
     float4 world_space = GixEngineTransform::rotate_axis_y(float4(input.position, 1.0f), rotate[id]);
 
     // clip pos
