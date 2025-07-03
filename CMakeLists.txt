@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 17)
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE debug)
+  set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 option(BUILD_EXAMPLES "Build examples" OFF)
