@@ -2,6 +2,7 @@ build
 libs/cglm-0.9.6
 libs/SDL3-3.2.10
 libs/json-c-0.18
+libs/flecs-4.1.0
 .cache
 libdxcompiler.so
 gix-engine-*.zip
