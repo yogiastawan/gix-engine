@@ -617,5 +617,5 @@ void gix_app_destroy(GixApp* app) {
 
     SDL_Quit();
 
-    free(app);
+    SDL_free(app);
 }
