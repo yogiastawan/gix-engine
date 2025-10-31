@@ -8,14 +8,17 @@ extern "C" {
 #endif
 
 #ifdef BUILD_DEBUG
+
 /**
- * @brief Show log level error
+ * @brief Show log level error. Call this if you want to show error log of SDL
+ * automatically.
  *
  * @param msg Format message
  */
-#define gix_log_error(msg...)                        \
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, msg); \
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", SDL_GetError())
+#define gix_log_error(msg...)                                    \
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, msg);             \
+    SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, ">> %s at %s:%d", \
+                 SDL_GetError(), __FILE__, __LINE__)
 
 /**
  * @brief Show log level info
@@ -29,7 +32,11 @@ extern "C" {
  *
  * @param msg Format message
  */
-#define gix_log_debug(msg...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, msg)
+#define gix_log_debug(msg...)                                           \
+    SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, msg);                    \
+    SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, ">> at %s:%d", __FILE__, \
+                 __LINE__)
+
 #else
 #define gix_log_error(msg...)
 #define gix_log(msg...)
