@@ -2,7 +2,7 @@
 #define __GIX_SHADER_H__
 
 #include <SDL3/SDL.h>
-#include <gix_engine/gix_app_engine.h>
+#include <gix_engine/core/gix_app_engine.h>
 
 #ifdef __cpluplus
 extern "C" {

@@ -3,8 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <cglm/cglm.h>
-
-#include <gix_engine/gix_define.h>
+#include <gix_engine/utilities/gix_define.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -164,8 +163,7 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
  * @note This function must be called
  * once only on init scene.
  */
-static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene,
-                                                    u8 numb) {
+static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene, u8 numb) {
     scene->numb_graphic_pipeline = numb;
     scene->graphic_pipeline =
         SDL_malloc(sizeof(void*) * scene->numb_graphic_pipeline);
@@ -179,8 +177,7 @@ static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene,
  * @param numb Number of compute
  * pipeline. Value: 0-255
  */
-static inline void gix_scene_alloc_compute_pipeline(GixScene* scene,
-                                                    u8 numb) {
+static inline void gix_scene_alloc_compute_pipeline(GixScene* scene, u8 numb) {
     scene->numb_compute_pipeline = numb;
     scene->compute_pipeline = SDL_malloc(sizeof(void*) * numb);
 }
@@ -197,8 +194,7 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
     Error:                                     \
     use function gix_scene_draw_3d_grid instead
 
-void __internal_gix_scene_set_3d_grid_color(GixScene* scene,
-                                            const u8 color[4]);
+void __internal_gix_scene_set_3d_grid_color(GixScene* scene, const u8 color[4]);
 #define __internal_gix_scene_set_3d_grid_color(...) \
     Error:                                          \
     use function gix_scene_set_3d_grid_color instead

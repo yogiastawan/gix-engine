@@ -1,9 +1,9 @@
 #include "cm_scene.h"
 
 #include <SDL3/SDL.h>
-#include <gix_engine/gix_app_engine.h>
+#include <gix_engine/gix_engine.h>
 
-static void init_data(CMScene *cm) {
+static void init_data(CMScene* cm) {
     // set cube_vertex;
     cm->numb_cube_vertex = 24;
 
@@ -114,7 +114,7 @@ static void init_data(CMScene *cm) {
     }
 }
 
-void cm_scene_init(CMScene *cm, SDL_GPUDevice *device,
+void cm_scene_init(CMScene* cm, SDL_GPUDevice* device,
                    SDL_GPUTextureFormat format, Uint32 w, Uint32 h) {
     cm->numb_cube = NUMB_CUBE;
     // create vertex_buffer
@@ -171,7 +171,7 @@ void cm_scene_init(CMScene *cm, SDL_GPUDevice *device,
     cm->rotate_transfer_buffer =
         SDL_CreateGPUTransferBuffer(device, &rotate_angle_tf_info);
 }
-void cm_scene_destroy(CMScene *cm, SDL_GPUDevice *device) {
+void cm_scene_destroy(CMScene* cm, SDL_GPUDevice* device) {
     SDL_ReleaseGPUBuffer(device, cm->vertex_buffer);
     SDL_ReleaseGPUBuffer(device, cm->color_buffer);
     SDL_ReleaseGPUBuffer(device, cm->index_buffer);

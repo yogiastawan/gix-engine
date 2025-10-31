@@ -1,6 +1,6 @@
-#include <gix_engine/gix_checker.h>
-#include <gix_engine/gix_log.h>
-#include <gix_engine/gix_shader.h>
+#include <gix_engine/core/gix_checker.h>
+#include <gix_engine/core/gix_log.h>
+#include <gix_engine/core/gix_shader.h>
 #include <json.h>
 
 typedef struct _GixInternalShaderInfo {

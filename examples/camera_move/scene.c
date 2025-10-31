@@ -1,28 +1,28 @@
 #include "scene.h"
 
 #include <cglm/cglm.h>
+#include <gix_engine/gix_engine.h>
 
 #include "cm_scene.h"
-#include "gix_engine/gix_app_engine.h"
 
-static SDL_AppResult init(GixScene *scene);
-static SDL_AppResult event(GixScene *scene, const SDL_Event *event);
-static SDL_AppResult update(GixScene *scene, Uint64 dt);
-static SDL_AppResult draw(GixScene *scene);
-static void quit(GixScene *scene);
+static SDL_AppResult init(GixScene* scene);
+static SDL_AppResult event(GixScene* scene, const SDL_Event* event);
+static SDL_AppResult update(GixScene* scene, Uint64 dt);
+static SDL_AppResult draw(GixScene* scene);
+static void quit(GixScene* scene);
 
-GixScene *create_scene(GixApp *app) {
-    GixScene *scene = gix_scene_new(app);
+GixScene* create_scene(GixApp* app) {
+    GixScene* scene = gix_scene_new(app);
 
     gix_scene_impl(scene, init, event, update, draw, quit);
     return scene;
 }
 
-SDL_AppResult init(GixScene *scene) {
-    SDL_GPUDevice *device = gix_app_get_gpu_device(scene->app);
-    SDL_Window *window = gix_app_get_window(scene->app);
+SDL_AppResult init(GixScene* scene) {
+    SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
+    SDL_Window* window = gix_app_get_window(scene->app);
 
-    CMScene *cm = malloc(sizeof(CMScene));
+    CMScene* cm = malloc(sizeof(CMScene));
     Uint32 w, h;
     Uint32 fmt = gix_app_get_depth_texture_format(scene->app);
     gix_app_get_window_size(scene->app, &w, &h);
@@ -31,10 +31,10 @@ SDL_AppResult init(GixScene *scene) {
     // setup pipeline
     gix_scene_alloc_graphic_pipeline(scene, 1);
     // load shader
-    SDL_GPUShader *vertex_shader = gix_load_shader(
+    SDL_GPUShader* vertex_shader = gix_load_shader(
         device, "./shader/SPIRV/camera_move.vert.spv",
         "./shader/SPIRV/camera_move.vert.json", SDL_GPU_SHADERSTAGE_VERTEX);
-    SDL_GPUShader *frag_shader = gix_load_shader(
+    SDL_GPUShader* frag_shader = gix_load_shader(
         device, "./shader/SPIRV/camera_move.frag.spv",
         "./shader/SPIRV/camera_move.frag.json", SDL_GPU_SHADERSTAGE_FRAGMENT);
 
@@ -117,22 +117,22 @@ SDL_AppResult init(GixScene *scene) {
                 (sizeof(vec4) * cm->numb_face_color) +         // face color
                 sizeof(vec4) * cm->numb_cube,                  // position_cube
     };
-    SDL_GPUTransferBuffer *transfer_buffer =
+    SDL_GPUTransferBuffer* transfer_buffer =
         SDL_CreateGPUTransferBuffer(device, &tf_info);
     // map transfer buffer
-    CubeVertex *transfer_address =
+    CubeVertex* transfer_address =
         SDL_MapGPUTransferBuffer(device, transfer_buffer, false);
     // copy data
     SDL_memcpy(transfer_address, cm->cube_vertex,
                sizeof(CubeVertex) * cm->numb_cube_vertex);
     SDL_memcpy(
-        (Uint8 *)transfer_address + (sizeof(CubeVertex) * cm->numb_cube_vertex),
+        (Uint8*)transfer_address + (sizeof(CubeVertex) * cm->numb_cube_vertex),
         cm->indice_vertex, sizeof(Uint16) * cm->numb_indice_vertex);
-    SDL_memcpy((Uint8 *)transfer_address +
+    SDL_memcpy((Uint8*)transfer_address +
                    (sizeof(CubeVertex) * cm->numb_cube_vertex) +
                    (sizeof(Uint16) * cm->numb_indice_vertex),
                cm->face_color, sizeof(vec4) * cm->numb_face_color);
-    SDL_memcpy((Uint8 *)transfer_address +
+    SDL_memcpy((Uint8*)transfer_address +
                    (sizeof(CubeVertex) * cm->numb_cube_vertex) +
                    (sizeof(Uint16) * cm->numb_indice_vertex) +
                    sizeof(vec4) * cm->numb_face_color,
@@ -141,9 +141,9 @@ SDL_AppResult init(GixScene *scene) {
     SDL_UnmapGPUTransferBuffer(device, transfer_buffer);
 
     // create cmd buffer for upload
-    SDL_GPUCommandBuffer *cmd = SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(device);
     // begin copy pass
-    SDL_GPUCopyPass *cp = SDL_BeginGPUCopyPass(cmd);
+    SDL_GPUCopyPass* cp = SDL_BeginGPUCopyPass(cmd);
     // upload vertex
     SDL_GPUTransferBufferLocation src = {
         .transfer_buffer = transfer_buffer,
@@ -191,23 +191,23 @@ SDL_AppResult init(GixScene *scene) {
     SDL_free(cm->position_cube);
     return SDL_APP_CONTINUE;
 }
-SDL_AppResult event(GixScene *scene, const SDL_Event *event) {
+SDL_AppResult event(GixScene* scene, const SDL_Event* event) {
     return SDL_APP_CONTINUE;
 }
-SDL_AppResult update(GixScene *scene, Uint64 dt) { return SDL_APP_CONTINUE; }
+SDL_AppResult update(GixScene* scene, Uint64 dt) { return SDL_APP_CONTINUE; }
 
-SDL_AppResult draw(GixScene *scene) {
-    SDL_Window *window = gix_app_get_window(scene->app);
-    SDL_GPUDevice *device = gix_app_get_gpu_device(scene->app);
-    CMScene *cm = scene->user_data;
+SDL_AppResult draw(GixScene* scene) {
+    SDL_Window* window = gix_app_get_window(scene->app);
+    SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
+    CMScene* cm = scene->user_data;
 
-    SDL_GPUCommandBuffer *cmd = SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(device);
 
-    SDL_GPUTexture *swapchain_texture;
+    SDL_GPUTexture* swapchain_texture;
     if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd, window, &swapchain_texture,
                                               NULL, NULL)) {
         // map rotate angel transfer buffer
-        float *rotate_transfer_address =
+        float* rotate_transfer_address =
             SDL_MapGPUTransferBuffer(device, cm->rotate_transfer_buffer, false);
         SDL_memcpy(rotate_transfer_address, cm->rotate_angle,
                    sizeof(float) * cm->numb_cube);
@@ -218,4 +218,4 @@ SDL_AppResult draw(GixScene *scene) {
     return SDL_APP_CONTINUE;
 }
 
-void quit(GixScene *scene) {}
+void quit(GixScene* scene) {}
