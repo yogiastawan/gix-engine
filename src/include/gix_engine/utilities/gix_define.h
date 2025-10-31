@@ -1,7 +1,8 @@
 #ifndef __GIX_DEFINE_H__
 #define __GIX_DEFINE_H__
 
-#include<stdint.h>
+#include <gix_engine/utilities/gix_platform.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,8 +23,18 @@ typedef double f64;
 typedef uint8_t bool8;
 typedef uint32_t bool32;
 
+#ifndef GEAPI
+
+#ifdef GIX_PLATFORM_WINDOWS
+#define GEAPI __declspec(dllexport)
+#else
+#define GEAPI
+#endif
+
+#endif
+
 #ifdef __cplusplus
-}   
+}
 #endif
 
 #endif /* __GIX_DEFINE_H__ */

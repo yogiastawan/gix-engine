@@ -37,14 +37,14 @@ extern "C" {
  *
  * @return const char*
  */
-const char* gix_engine_version(void);
+GEAPI const char* gix_engine_version(void);
 
 /**
  * @brief Get version of Gix Engine in number.
  *
  * @return int
  */
-int gix_engine_version_num(void);
+GEAPI int gix_engine_version_num(void);
 
 #ifdef __cplusplus
 }

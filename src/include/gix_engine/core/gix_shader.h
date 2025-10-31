@@ -8,9 +8,10 @@
 extern "C" {
 #endif
 
-SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device, const char* shader_file,
-                               const char* info_file,
-                               SDL_GPUShaderStage shader_stage);
+GEAPI SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device,
+                                     const char* shader_file,
+                                     const char* info_file,
+                                     SDL_GPUShaderStage shader_stage);
 
 #ifdef __cpluplus
 }
