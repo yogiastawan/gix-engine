@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include <cglm/cglm.h>
 
+#include <gix_engine/gix_define.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,7 +15,7 @@ extern "C" {
 #endif
 
 #define GIX_ENGINE_NUMB_GRID_3D_LINE_DEFAULT 50
-#define GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT (Uint8[4]){200, 200, 200, 255}
+#define GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT (u8[4]){200, 200, 200, 255}
 
 #define gix_scene_init(scene) scene->scene_init(scene)
 #define gix_scene_event(scene, event) scene->scene_event(scene, event)
@@ -94,12 +96,12 @@ struct _GixScene {
     /// List of graphic pipline
     SDL_GPUGraphicsPipeline** graphic_pipeline;
     /// Number of graphics pipeline
-    Uint8 numb_graphic_pipeline;
+    u8 numb_graphic_pipeline;
 
     // List of compute pipline
     SDL_GPUGraphicsPipeline** compute_pipeline;
     /// Number of compute pipeline
-    Uint8 numb_compute_pipeline;
+    u8 numb_compute_pipeline;
 
     // Implement function
     SceneInit scene_init;
@@ -163,7 +165,7 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
  * once only on init scene.
  */
 static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene,
-                                                    Uint8 numb) {
+                                                    u8 numb) {
     scene->numb_graphic_pipeline = numb;
     scene->graphic_pipeline =
         SDL_malloc(sizeof(void*) * scene->numb_graphic_pipeline);
@@ -178,13 +180,13 @@ static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene,
  * pipeline. Value: 0-255
  */
 static inline void gix_scene_alloc_compute_pipeline(GixScene* scene,
-                                                    Uint8 numb) {
+                                                    u8 numb) {
     scene->numb_compute_pipeline = numb;
     scene->compute_pipeline = SDL_malloc(sizeof(void*) * numb);
 }
 
 #ifdef BUILD_DEBUG
-void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint32 lenght_side);
+void __internal_gix_scene_setup_3d_grid(GixScene* scene, u32 lenght_side);
 #define __internal_gix_scene_setup_3d_grid(...) \
     Error:                                      \
     use function gix_scene_setup_3d_grid instead
@@ -196,7 +198,7 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
     use function gix_scene_draw_3d_grid instead
 
 void __internal_gix_scene_set_3d_grid_color(GixScene* scene,
-                                            const Uint8 color[4]);
+                                            const u8 color[4]);
 #define __internal_gix_scene_set_3d_grid_color(...) \
     Error:                                          \
     use function gix_scene_set_3d_grid_color instead
@@ -256,18 +258,18 @@ void gix_app_set_name(GixApp* app, const char* name);
  * @param width Integer value of width
  * @param height Integer value of height
  */
-void gix_app_set_window_size(GixApp* app, int width, int height);
+void gix_app_set_window_size(GixApp* app, i32 width, i32 height);
 
 /**
  * @brief Get Window size of GixApp
  *
  * @param app GixApp pointer
- * @param width Uint32 pointer to hold
+ * @param width u32 pointer to hold
  * window width value
- * @param height Uint32 pointer to hold
+ * @param height u32 pointer to hold
  * window height value
  */
-void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32* height);
+void gix_app_get_window_size(GixApp* app, u32* width, u32* height);
 
 /**
  * @brief Set GixApp window position
@@ -278,7 +280,7 @@ void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32* height);
  * @param y Integer value of y position
  * or use SDL_WINDOWPOS_CENTERED
  */
-void gix_app_set_window_position(GixApp* app, int x, int y);
+void gix_app_set_window_position(GixApp* app, i32 x, i32 y);
 
 void gix_app_set_window_resizeable(GixApp* app, bool resizeable);
 

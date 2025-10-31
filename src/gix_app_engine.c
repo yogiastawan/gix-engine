@@ -17,11 +17,11 @@ struct _GixApp {
     GixScene* loading_scene;
     GixScene* current_scene;
 
-    Uint64 delta_time;
-    Uint64 last_tick;
+    u64 delta_time;
+    u64 last_tick;
 
-    Uint32 window_width;
-    Uint32 window_height;
+    u32 window_width;
+    u32 window_height;
 
     bool is_onload_scene;
 };
@@ -35,12 +35,12 @@ struct _GixSceneDebugPrivate {
     SDL_GPUBuffer* vertex_grid_3d_buffer;
     SDL_GPUBuffer* line_grid_3d_buffer;
     SDL_GPUGraphicsPipeline* grid_3d_pipeLine;
-    Uint32 grid_3d_numb_line;
-    Uint8 grid_3d_color[4];
+    u32 grid_3d_numb_line;
+    u8 grid_3d_color[4];
     bool is_grid_3d_inited;
 };
 typedef struct _VertexGrid3DLine {
-    Uint8 color[4];
+    u8 color[4];
 } VertexGrid3DLine;
 
 typedef struct _Line3DData {
@@ -49,7 +49,7 @@ typedef struct _Line3DData {
 
 typedef struct Grid3DUniform {
     mat4 vp;
-    Uint32 numb_instance;
+    u32 numb_instance;
 } Grid3DUniform;
 
 #endif
@@ -110,7 +110,7 @@ SDL_AppResult SDL_AppIterate(void* app_state) {
     GixApp* app = (GixApp*)app_state;
     gix_if_null_exit(app, gix_log("GixApp should not NULL"));
 
-    Uint64 current_tick = SDL_GetTicks();
+    u64 current_tick = SDL_GetTicks();
     app->delta_time = (current_tick - app->last_tick);
     app->last_tick = current_tick;
 
@@ -164,7 +164,7 @@ GixScene* gix_scene_new(GixApp* app) {
     scene->priv->line_grid_3d_buffer = NULL;
     scene->priv->grid_3d_numb_line = GIX_ENGINE_NUMB_GRID_3D_LINE_DEFAULT;
     SDL_memcpy(scene->priv->grid_3d_color,
-               GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT, sizeof(Uint8) * 4);
+               GIX_ENGINE_COLOR_GRID_3D_LINE_DEFAULT, sizeof(u8) * 4);
     scene->priv->is_grid_3d_inited = false;
 #endif
 
@@ -192,11 +192,11 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
 }
 
 #ifdef BUILD_DEBUG
-void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint32 length_side) {
+void __internal_gix_scene_setup_3d_grid(GixScene* scene, u32 length_side) {
     if (scene->priv->is_grid_3d_inited) {
         return;
     }
-    Uint32 length =
+    u32 length =
         length_side +
         (length_side % 2);  // if length_side is odd then add 1 meter more
 
@@ -359,7 +359,7 @@ void __internal_gix_scene_setup_3d_grid(GixScene* scene, Uint32 length_side) {
         {.start_end = {start, end}},
         {.start_end = {end, start}},
     };
-    SDL_memcpy((Uint8*)transfer_address +
+    SDL_memcpy((u8*)transfer_address +
                    (sizeof(VertexGrid3DLine) * GIX_ENGINE_NUM_GRID_3D_VERTEX),
                line_data, sizeof(Line3DData) * GIX_ENGINE_NUM_GRID_3D_DATA);
     // unmap
@@ -428,8 +428,8 @@ void __internal_gix_scene_draw_3d_grid(GixScene* scene,
 }
 
 void __internal_gix_scene_set_3d_grid_color(GixScene* scene,
-                                            const Uint8 color[4]) {
-    SDL_memcpy(scene->priv->grid_3d_color, color, sizeof(Uint8) * 4);
+                                            const u8 color[4]) {
+    SDL_memcpy(scene->priv->grid_3d_color, color, sizeof(u8) * 4);
 }
 #endif
 
@@ -440,12 +440,12 @@ void gix_scene_destroy(GixScene* scene) {
     // free user data
     SDL_free(scene->user_data);
     // free graphic pipelines
-    for (Uint8 i = 0; i < scene->numb_graphic_pipeline; i++) {
+    for (u8 i = 0; i < scene->numb_graphic_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device,
                                        scene->graphic_pipeline[i]);
     }
     // free compute pipeline
-    for (Uint8 i = 0; i < scene->numb_compute_pipeline; i++) {
+    for (u8 i = 0; i < scene->numb_compute_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device,
                                        scene->compute_pipeline[i]);
     }
@@ -517,16 +517,16 @@ void gix_app_set_name(GixApp* app, const char* name) {
     SDL_SetWindowTitle(app->window, name);
 }
 
-void gix_app_get_window_size(GixApp* app, Uint32* width, Uint32* height) {
+void gix_app_get_window_size(GixApp* app, u32* width, u32* height) {
     *width = app->window_width;
     *height = app->window_height;
 }
 
-void gix_app_set_window_size(GixApp* app, int width, int height) {
+void gix_app_set_window_size(GixApp* app, i32 width, i32 height) {
     SDL_SetWindowSize(app->window, width, height);
 }
 
-void gix_app_set_window_position(GixApp* app, int x, int y) {
+void gix_app_set_window_position(GixApp* app, i32 x, i32 y) {
     SDL_SetWindowPosition(app->window, x, y);
 }
 
