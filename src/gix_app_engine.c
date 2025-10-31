@@ -70,6 +70,10 @@ static char* concate_str(const char* dir, const char* file_name) {
 static void gix_app_sdl_init() {
     bool init_result = SDL_Init(SDL_INIT_VIDEO);
     gix_if_exit(!init_result, gix_log_error("Couldn't init SDL"));
+
+#ifdef BUILD_DEBUG
+    SDL_SetLogPriorities(SDL_LOG_PRIORITY_DEBUG);
+#endif
 }
 // #ifdef GIX_APP_MAIN
 
@@ -88,7 +92,7 @@ SDL_AppResult SDL_AppInit(void** app_state, int argc, char* argv[]) {
 
 SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
     GixApp* app = (GixApp*)app_state;
-    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+    gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
 
     switch (event->type) {
         case SDL_EVENT_QUIT: {
@@ -108,7 +112,7 @@ SDL_AppResult SDL_AppEvent(void* app_state, SDL_Event* event) {
 
 SDL_AppResult SDL_AppIterate(void* app_state) {
     GixApp* app = (GixApp*)app_state;
-    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+    gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
 
     u64 current_tick = SDL_GetTicks();
     app->delta_time = (current_tick - app->last_tick);
@@ -137,7 +141,7 @@ void SDL_AppQuit(void* app_state, SDL_AppResult result) {
     }
 
     GixApp* app = (GixApp*)app_state;
-    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
+    gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
 
     gix_app_destroy(app);
 }
@@ -183,7 +187,7 @@ GixScene* gix_scene_from_file(GixApp* app, const char* file_path) {
 void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
                     SceneUpdate update_func, SceneDraw draw_func,
                     SceneQuit quit_func) {
-    gix_if_null_exit(scene, gix_log("Can impl of NULL GixScene"));
+    gix_if_null_exit(scene, gix_log_debug("GixScene must not be NULL"));
     scene->scene_init = init_func;
     scene->scene_event = event_func;
     scene->scene_update = update_func;
@@ -435,7 +439,7 @@ void __internal_gix_scene_set_3d_grid_color(GixScene* scene,
 
 void gix_scene_destroy(GixScene* scene) {
     gix_log("Destroy GixScene");
-    gix_if_null_exit(scene, gix_log("Can not destroy NULl of scene"));
+    gix_if_null_exit(scene, gix_log_debug("Can not destroy NULl of scene"));
     SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
     // free user data
     SDL_free(scene->user_data);
@@ -456,9 +460,17 @@ void gix_scene_destroy(GixScene* scene) {
 
     // free debug
 #ifdef BUILD_DEBUG
-    SDL_ReleaseGPUBuffer(device, scene->priv->vertex_grid_3d_buffer);
-    SDL_ReleaseGPUBuffer(device, scene->priv->line_grid_3d_buffer);
-    SDL_ReleaseGPUGraphicsPipeline(device, scene->priv->grid_3d_pipeLine);
+    if (scene->priv->vertex_grid_3d_buffer) {
+        SDL_ReleaseGPUBuffer(device, scene->priv->vertex_grid_3d_buffer);
+    }
+
+    if (scene->priv->line_grid_3d_buffer) {
+        SDL_ReleaseGPUBuffer(device, scene->priv->line_grid_3d_buffer);
+    }
+    if (scene->priv->grid_3d_pipeLine) {
+        SDL_ReleaseGPUGraphicsPipeline(device, scene->priv->grid_3d_pipeLine);
+    }
+
     SDL_free(scene->priv);
 #endif
 
@@ -469,7 +481,7 @@ void gix_scene_destroy(GixScene* scene) {
 GixApp* gix_app_new(const char* name) {
     gix_log("Create new GixApp");
 
-    gix_if_null_exit(name, gix_log("Name GixApp shouldn't NULL"));
+    gix_if_null_exit(name, gix_log_debug("Name GixApp shouldn't NULL"));
 
     gix_app_sdl_init();
 
@@ -538,16 +550,16 @@ void gix_app_set_window_resizeable(GixApp* app, bool resizeable) {
 void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
     gix_log("Set loading scene to GixApp");
 
-    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
-    gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
+    gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
+    gix_if_null_exit(scene, gix_log_debug("GixScene should not NULL"));
     app->loading_scene = scene;
 }
 
 SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene) {
     gix_log("Set scene to GixApp");
 
-    gix_if_null_exit(app, gix_log("GixApp should not NULL"));
-    gix_if_null_exit(scene, gix_log("GixScene should not NULL"));
+    gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
+    gix_if_null_exit(scene, gix_log_debug("GixScene should not NULL"));
 
     // TODO! Loading scene here
     // set is_onload_scene to true
@@ -599,7 +611,7 @@ SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app) {
 void gix_app_destroy(GixApp* app) {
     gix_log("Destroy GixApp");
 
-    gix_if_null_exit(app, gix_log("Can not destroy of NULL GixApp"));
+    gix_if_null_exit(app, gix_log_debug("Can not destroy of NULL GixApp"));
 
     if (app->loading_scene) {
         app->loading_scene->scene_quit(app->loading_scene);
