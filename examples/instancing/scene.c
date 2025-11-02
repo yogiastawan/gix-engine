@@ -20,22 +20,22 @@ typedef struct _CubeVertex {
 } CubeVertex;
 
 typedef struct _MyScene {
-    SDL_GPUBuffer *vertex_buffer;
-    SDL_GPUBuffer *index_buffer;
-    SDL_GPUBuffer *color_buffer;
-    SDL_GPUBuffer *model_matrix_buffer;
+    SDL_GPUBuffer* vertex_buffer;
+    SDL_GPUBuffer* index_buffer;
+    SDL_GPUBuffer* color_buffer;
+    SDL_GPUBuffer* model_matrix_buffer;
 
-    SDL_GPUTexture *depth_texture;
+    SDL_GPUTexture* depth_texture;
 
-    SDL_GPUTransferBuffer *model_matrix_transfer_buffer;
+    SDL_GPUTransferBuffer* model_matrix_transfer_buffer;
 
-    CubeVertex *cube_vertex;
+    CubeVertex* cube_vertex;
     Uint16 numb_cube_vertex;
 
-    Uint16 *indice_vertex;
+    Uint16* indice_vertex;
     Uint16 numb_indice;
 
-    vec4 *face_colors;
+    vec4* face_colors;
     Uint8 numb_face_color;
 
     VP vp;
@@ -53,30 +53,30 @@ typedef struct _MyScene {
 
 } MyScene;
 
-static void init_my_scene(MyScene *scene);
+static void init_my_scene(MyScene* scene);
 
-static SDL_AppResult init(GixScene *self);
-static SDL_AppResult event(GixScene *self, const SDL_Event *event);
-static SDL_AppResult update(GixScene *self, Uint64 delta_time);
-static SDL_AppResult draw(GixScene *self);
-static void quit(GixScene *self);
+static SDL_AppResult init(GixScene* self);
+static SDL_AppResult event(GixScene* self, const SDL_Event* event);
+static SDL_AppResult update(GixScene* self, Uint64 delta_time);
+static SDL_AppResult draw(GixScene* self);
+static void quit(GixScene* self);
 
-static void update_model_matrix(MyScene *scene, Uint64 delta_time);
+static void update_model_matrix(MyScene* scene, Uint64 delta_time);
 
-GixScene *create_scene(GixApp *app) {
-    GixScene *scene = gix_scene_new(app);
+GixScene* create_scene(GixApp* app) {
+    GixScene* scene = gix_scene_new(app);
     gix_scene_impl(scene, init, event, update, draw, quit);
     return scene;
 }
 
-SDL_AppResult init(GixScene *self) {
+SDL_AppResult init(GixScene* self) {
     gix_log("Init GixScene for Instancing");
 
-    SDL_Window *window = gix_app_get_window(self->app);
-    SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
+    SDL_Window* window = gix_app_get_window(self->app);
+    SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
 
     // create my scene
-    MyScene *scene = SDL_malloc(sizeof(MyScene));
+    MyScene* scene = SDL_malloc(sizeof(MyScene));
     self->user_data = scene;
     gix_app_get_window_size(self->app, &scene->w, &scene->h);
     gix_log("get size %ux%u", scene->w, scene->h);
@@ -131,10 +131,10 @@ SDL_AppResult init(GixScene *self) {
     // setup pipe line
     gix_scene_alloc_graphic_pipeline(self, 1);
     // load shader
-    SDL_GPUShader *vertex_shader = gix_load_shader(
+    SDL_GPUShader* vertex_shader = gix_load_shader(
         device, "./shader/SPIRV/instancing.vert.spv",
         "./shader/SPIRV/instancing.vert.json", SDL_GPU_SHADERSTAGE_VERTEX);
-    SDL_GPUShader *frag_shader = gix_load_shader(
+    SDL_GPUShader* frag_shader = gix_load_shader(
         device, "./shader/SPIRV/instancing.frag.spv",
         "./shader/SPIRV/instancing.frag.json", SDL_GPU_SHADERSTAGE_FRAGMENT);
     // create color target description
@@ -219,20 +219,20 @@ SDL_AppResult init(GixScene *self) {
                 (sizeof(Uint16) * scene->numb_indice) +
                 (sizeof(vec4) * scene->numb_face_color),
     };
-    SDL_GPUTransferBuffer *transfer_buffer =
+    SDL_GPUTransferBuffer* transfer_buffer =
         SDL_CreateGPUTransferBuffer(device, &transfer_buffer_info);
     // map transfer buffer
-    CubeVertex *transfer_address =
+    CubeVertex* transfer_address =
         SDL_MapGPUTransferBuffer(device, transfer_buffer, false);
     // copy cube vertex data
     SDL_memcpy(transfer_address, scene->cube_vertex,
                sizeof(CubeVertex) * scene->numb_cube_vertex);
     // copy indice
-    SDL_memcpy((Uint8 *)transfer_address +
+    SDL_memcpy((Uint8*)transfer_address +
                    (sizeof(CubeVertex) * scene->numb_cube_vertex),
                scene->indice_vertex, sizeof(Uint16) * scene->numb_indice);
     // copy face color
-    SDL_memcpy((Uint8 *)transfer_address +
+    SDL_memcpy((Uint8*)transfer_address +
                    (sizeof(CubeVertex) * scene->numb_cube_vertex) +
                    (sizeof(Uint16) * scene->numb_indice),
                scene->face_colors, sizeof(vec4) * scene->numb_face_color);
@@ -240,8 +240,8 @@ SDL_AppResult init(GixScene *self) {
     SDL_UnmapGPUTransferBuffer(device, transfer_buffer);
 
     // Upload buffer data
-    SDL_GPUCommandBuffer *upload_cmd = SDL_AcquireGPUCommandBuffer(device);
-    SDL_GPUCopyPass *copy_pass = SDL_BeginGPUCopyPass(upload_cmd);
+    SDL_GPUCommandBuffer* upload_cmd = SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(upload_cmd);
     // upload vertex
     SDL_GPUTransferBufferLocation src = {
         .transfer_buffer = transfer_buffer,
@@ -285,28 +285,28 @@ SDL_AppResult init(GixScene *self) {
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult event(GixScene *self, const SDL_Event *event) {
+SDL_AppResult event(GixScene* self, const SDL_Event* event) {
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult update(GixScene *self, Uint64 delta_time) {
-    MyScene *scene = self->user_data;
+SDL_AppResult update(GixScene* self, Uint64 delta_time) {
+    MyScene* scene = self->user_data;
     update_model_matrix(scene, delta_time);
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult draw(GixScene *self) {
-    SDL_Window *window = gix_app_get_window(self->app);
-    SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
-    MyScene *scene = self->user_data;
+SDL_AppResult draw(GixScene* self) {
+    SDL_Window* window = gix_app_get_window(self->app);
+    SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
+    MyScene* scene = self->user_data;
 
-    SDL_GPUCommandBuffer *cmd = SDL_AcquireGPUCommandBuffer(device);
+    SDL_GPUCommandBuffer* cmd = SDL_AcquireGPUCommandBuffer(device);
 
-    SDL_GPUTexture *swapchain_texture;
+    SDL_GPUTexture* swapchain_texture;
     if (SDL_WaitAndAcquireGPUSwapchainTexture(cmd, window, &swapchain_texture,
                                               NULL, NULL)) {
         // map model matrix transfer buffer
-        mat4 *transfer_address = SDL_MapGPUTransferBuffer(
+        mat4* transfer_address = SDL_MapGPUTransferBuffer(
             device, scene->model_matrix_transfer_buffer, true);
 
         SDL_memcpy(transfer_address, scene->model_matrix,
@@ -314,7 +314,7 @@ SDL_AppResult draw(GixScene *self) {
         SDL_UnmapGPUTransferBuffer(device, scene->model_matrix_transfer_buffer);
 
         // upload to gpu
-        SDL_GPUCopyPass *copy_pass = SDL_BeginGPUCopyPass(cmd);
+        SDL_GPUCopyPass* copy_pass = SDL_BeginGPUCopyPass(cmd);
         SDL_UploadToGPUBuffer(
             copy_pass,
             &(SDL_GPUTransferBufferLocation){
@@ -342,7 +342,7 @@ SDL_AppResult draw(GixScene *self) {
         depth_target_info.load_op = SDL_GPU_LOADOP_CLEAR;
         depth_target_info.store_op = SDL_GPU_STOREOP_DONT_CARE;
 
-        SDL_GPURenderPass *render_pass = SDL_BeginGPURenderPass(
+        SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(
             cmd, &color_target_info, 1, &depth_target_info);
 
         // Draw 3D grid
@@ -366,7 +366,7 @@ SDL_AppResult draw(GixScene *self) {
         SDL_BindGPUIndexBuffer(render_pass, &index_buffer_binding,
                                SDL_GPU_INDEXELEMENTSIZE_16BIT);
         // bind vertex storage buffer
-        SDL_GPUBuffer *vertex_storage_buffer[2] = {
+        SDL_GPUBuffer* vertex_storage_buffer[2] = {
             scene->color_buffer,
             scene->model_matrix_buffer,
         };
@@ -385,9 +385,9 @@ SDL_AppResult draw(GixScene *self) {
     return SDL_APP_CONTINUE;
 }
 
-void quit(GixScene *self) {
-    MyScene *scene = self->user_data;
-    SDL_GPUDevice *device = gix_app_get_gpu_device(self->app);
+void quit(GixScene* self) {
+    MyScene* scene = self->user_data;
+    SDL_GPUDevice* device = gix_app_get_gpu_device(self->app);
 
     SDL_ReleaseGPUBuffer(device, scene->vertex_buffer);
     SDL_ReleaseGPUBuffer(device, scene->index_buffer);
@@ -397,7 +397,7 @@ void quit(GixScene *self) {
     SDL_ReleaseGPUTransferBuffer(device, scene->model_matrix_transfer_buffer);
 }
 
-static void init_my_scene(MyScene *scene) {
+static void init_my_scene(MyScene* scene) {
     // set numb_cube_vertex;
     scene->numb_cube_vertex = 24;
     // set *cube_vertex;
@@ -509,12 +509,14 @@ static void init_my_scene(MyScene *scene) {
     }
 }
 
-static void update_model_matrix(MyScene *scene, Uint64 delta_time) {
+static void update_model_matrix(MyScene* scene, Uint64 delta_time) {
+    // compute view_proj to handle window resize. if window size static move
+    // this to init
     glm_lookat(scene->camera.position, scene->camera.target,
                (vec3){0.f, 1.f, 0.f}, scene->vp.view);
     // glm_translate(scene->vp.view, (vec3){0.0f, 0.0f, -5.0f});
 
-    glm_mat4_mulN((mat4 *[]){&(scene->vp.projection), &(scene->vp.view)}, 2,
+    glm_mat4_mulN((mat4*[]){&(scene->vp.projection), &(scene->vp.view)}, 2,
                   scene->view_proj);
 
     scene->rotate_angle = glm_rad(scene->rotate_speed) * (float)delta_time;
