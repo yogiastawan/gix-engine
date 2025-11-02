@@ -1,6 +1,8 @@
 #ifndef __GIX_ENGINE_VERSION_H__
 #define __GIX_ENGINE_VERSION_H__
 
+#include <gix_engine/utilities/gix_define.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
