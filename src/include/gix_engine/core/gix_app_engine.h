@@ -12,6 +12,7 @@ extern "C" {
 
 // Define default memory arena size
 #ifndef GIX_ENGINE_ARENA_DEFAULT_SIZE
+/// @brief Default size of memory arena for GixScene in bytes
 #define GIX_ENGINE_ARENA_DEFAULT_SIZE 1048576  // 1 MB
 #endif
 

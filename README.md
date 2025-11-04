@@ -1,13 +1,17 @@
 # Intro
+
 gix-engine is just simple game template using SDL3 GPU.
 
-# Prerequisites
+## Prerequisites
+
 Libraries that used in gix-engine:
+
 1. [SDL3](https://www.libsdl.org/)
 2. [cglm](https://github.com/recp/cglm)
 3. [json-c](https://github.com/json-c/json-c)
 
-# How to use
+## How to use
+
 To use gix-engine we need define some option and variable. Below is list of options and variable we can set.
 
 | Name                           | Default Value                              | Desc                                                                                                                            |
@@ -22,21 +26,29 @@ To use gix-engine we need define some option and variable. Below is list of opti
 | CGLM_DIR                       |                                            | Directory location of cglm. Note: Must be set                                                                                   |
 | JSON_C_DIR                     |                                            | Directory location of json-c. Note: Must be set                                                                                 |
 | GIX_ENGINE_SHADER_COMPILED_DIR | gix-engine/gix_engine_shader               | Directory of system shader directory location. Only used if USE_COMPILED_SHADER=ON                                              |
-| GIX_ENGINE_SHADER_DIR_OUT      | path_of_gix-engine_build/gix_engine_shader | Directory of compiled system shader will be stored. Oly used if          USE_COMPILED_SHADER=OFF                                |
+| GIX_ENGINE_SHADER_DIR_OUT      | path_of_gix-engine_build/gix_engine_shader | Directory of compiled system shader will be stored. Only used if USE_COMPILED_SHADER=OFF                                        |
+| GIX_ENGINE_ARENA_DEFAULT_SIZE  | 1 MB                                       | Size of default size memory arena in every scene                                                                                |
 
 ## Build gix-engine
+
 1. Configure gix-engine to folder build
+
     ```sh
     cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DBUILD_SHARED=OFF -DBUILD_EXAMPLES=ON -DUSE_COMPILED_SHADER=OFF -DGIX_ENGINE_SHADER_DIR_OUT={PROJECT_SOURCE_DIR}/gix-engine-shader -DSDL3_DIR=libs/SDL3-3.2.10 -DCGLM_DIR=libs/cglm-0.9.6 -DJSON_C_DIR=libs/json-c-0.18 -DSDL_SHADER_CROSS=bin/shadercross -S./ -B./build
     ```
+
 2. Build gix-engine
+
    ```sh
    cmake --build ./build --config Debug --target all
    ```
+
 3. Copy compiled library in `./build` to your project. Also copy the header file in `src/include/gix_engine` to your project.
 
 ## Add to Cmake project
+
 1. On your project cmake add variable definition.
+
    ```cmake
    set(BUILD_SHARED OFF)
    set(BUILD_EXAMPLES ON)
@@ -58,4 +70,5 @@ To use gix-engine we need define some option and variable. Below is list of opti
    # target_link_libraries(your_roject gix-engine)
 
    ```
+
 2. Configure and build your project
