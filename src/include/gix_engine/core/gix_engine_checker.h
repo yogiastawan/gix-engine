@@ -1,5 +1,5 @@
-#ifndef __GIX_CHECKER_H__
-#define __GIX_CHECKER_H__
+#ifndef __GIX_ENGINE_CHECKER_H__
+#define __GIX_ENGINE_CHECKER_H__
 
 #ifdef __cpluplus
 extern "C" {
@@ -64,4 +64,4 @@ static size_t exit_code = 0;
 }
 #endif
 
-#endif /* __GIX_CHECKER_H__ */
+#endif /* __GIX_ENGINE_CHECKER_H__ */

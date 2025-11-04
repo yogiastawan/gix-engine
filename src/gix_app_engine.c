@@ -3,9 +3,9 @@
 #include <SDL3/SDL_main.h>
 // #endif
 #include <gix_engine/core/gix_app_engine.h>
-#include <gix_engine/core/gix_checker.h>
-#include <gix_engine/core/gix_log.h>
-#include <gix_engine/core/gix_shader.h>
+#include <gix_engine/core/gix_engine_checker.h>
+#include <gix_engine/core/gix_engine_log.h>
+#include <gix_engine/core/gix_engine_shader.h>
 
 #undef __internal_gix_scene_setup_3d_grid
 #undef __internal_gix_scene_draw_3d_grid

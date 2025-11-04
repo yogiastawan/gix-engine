@@ -3,7 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <cglm/cglm.h>
-#include <gix_engine/utilities/gix_define.h>
+#include <gix_engine/utilities/gix_engine_define.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,7 +73,7 @@ typedef struct _GixScene GixScene;
 
 ///* GixApp struct is used to create a GixApp engine.
 ///* All GixApp field are private. But you can use GixApp public function to
-///access it.
+/// access it.
 ///* GixApp is a singleton class, you can only create one instance of it.
 typedef struct _GixApp GixApp;
 

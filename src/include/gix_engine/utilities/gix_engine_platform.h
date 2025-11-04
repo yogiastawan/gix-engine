@@ -4,39 +4,39 @@
  * assets).
  */
 
-#ifndef __GIX_PLATFORM_H__
-#define __GIX_PLATFORM_H__
+#ifndef __GIX_ENGINE_PLATFORM_H__
+#define __GIX_ENGINE_PLATFORM_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifdef _WIN32
-#define GIX_PLATFORM_WINDOWS
+#define GIX_ENGINE_PLATFORM_WINDOWS
 #ifdef _WIN64
-#define GIX_PLATFORM_WINDOWS_64
+#define GIX_ENGINE_PLATFORM_WINDOWS_64
 #else
-#define GIX_PLATFORM_WINDOWS_32
+#define GIX_ENGINE_PLATFORM_WINDOWS_32
 #endif
 #elif __APPLE__
 #include <TargetConditionals.h>
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-#define GIX_PLATFORM_IOS
+#define GIX_ENGINE_PLATFORM_IOS
 #else
-#define GIX_PLATFORM_MACOS
+#define GIX_ENGINE_PLATFORM_MACOS
 #endif
 #elif __ANDROID__
-#define GIX_PLATFORM_ANDROID
+#define GIX_ENGINE_PLATFORM_ANDROID
 #elif __linux__
-#define GIX_PLATFORM_LINUX
+#define GIX_ENGINE_PLATFORM_LINUX
 #elif __unix__
-#define GIX_PLATFORM_UNIX
+#define GIX_ENGINE_PLATFORM_UNIX
 #else
-#define GIX_PLATFORM_UNKNOWN
+#define GIX_ENGINE_PLATFORM_UNKNOWN
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __GIX_PLATFORM_H__ */
+#endif /* __GIX_ENGINE_PLATFORM_H__ */

@@ -1,5 +1,5 @@
-#ifndef __GIX_LOG_H__
-#define __GIX_LOG_H__
+#ifndef __GIX_ENGINE_LOG_H__
+#define __GIX_ENGINE_LOG_H__
 
 #include <SDL3/SDL.h>
 
@@ -47,4 +47,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __GIX_LOG_H__ */
+#endif /* __GIX_ENGINE_LOG_H__ */

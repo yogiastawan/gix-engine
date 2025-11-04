@@ -1,5 +1,5 @@
-#ifndef __GIX_SHADER_H__
-#define __GIX_SHADER_H__
+#ifndef __GIX_ENGINE_SHADER_H__
+#define __GIX_ENGINE_SHADER_H__
 
 #include <SDL3/SDL.h>
 #include <gix_engine/core/gix_app_engine.h>
@@ -17,4 +17,4 @@ GEAPI SDL_GPUShader* gix_load_shader(SDL_GPUDevice* device,
 }
 #endif
 
-#endif /* __GIX_SHADER_H__ */
+#endif /* __GIX_ENGINE_SHADER_H__ */

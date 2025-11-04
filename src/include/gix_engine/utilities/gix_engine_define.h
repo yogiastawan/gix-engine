@@ -1,12 +1,16 @@
-#ifndef __GIX_DEFINE_H__
-#define __GIX_DEFINE_H__
+#ifndef __GIX_ENGINE_DEFINE_H__
+#define __GIX_ENGINE_DEFINE_H__
 
-#include <gix_engine/utilities/gix_platform.h>
+#include <gix_engine/utilities/gix_engine_platform.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef GIX_DEFINE_TYPES
+#define GIX_DEFINE_TYPES
 
 typedef int8_t i8;
 typedef uint8_t u8;
@@ -23,9 +27,13 @@ typedef double f64;
 typedef uint8_t bool8;
 typedef uint32_t bool32;
 
+typedef size_t usize;
+
+#endif
+
 #ifndef GEAPI
 
-#ifdef GIX_PLATFORM_WINDOWS
+#ifdef GIX_ENGINE_PLATFORM_WINDOWS
 #define GEAPI __declspec(dllexport)
 #else
 #define GEAPI
@@ -37,4 +45,4 @@ typedef uint32_t bool32;
 }
 #endif
 
-#endif /* __GIX_DEFINE_H__ */
+#endif /* __GIX_ENGINE_DEFINE_H__ */

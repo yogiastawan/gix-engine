@@ -180,5 +180,11 @@ void cm_scene_destroy(CMScene* cm, SDL_GPUDevice* device) {
     SDL_ReleaseGPUBuffer(device, cm->position_cube_buffer);
     SDL_ReleaseGPUTransferBuffer(device, cm->rotate_transfer_buffer);
 
+    SDL_free(cm->cube_vertex);
+    SDL_free(cm->indice_vertex);
+    SDL_free(cm->face_color);
+    SDL_free(cm->position_cube);
     SDL_free(cm->rotate_angle);
+
+    SDL_free(cm);
 }

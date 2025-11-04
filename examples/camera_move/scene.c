@@ -23,6 +23,9 @@ SDL_AppResult init(GixScene* scene) {
     SDL_Window* window = gix_app_get_window(scene->app);
 
     CMScene* cm = malloc(sizeof(CMScene));
+
+    // set user data scene
+    scene->user_data = cm;
     Uint32 w, h;
     Uint32 fmt = gix_app_get_depth_texture_format(scene->app);
     gix_app_get_window_size(scene->app, &w, &h);
@@ -181,7 +184,7 @@ SDL_AppResult init(GixScene* scene) {
     SDL_EndGPUCopyPass(cp);
     // submit cmd
     bool res = SDL_SubmitGPUCommandBuffer(cmd);
-    gix_if_exit(!res, gix_log("Couldn't submit cmd"));
+    gix_if_exit(!res, gix_log_error("Couldn't submit cmd"));
     // release transfer buffer
     SDL_ReleaseGPUTransferBuffer(device, transfer_buffer);
     // free vertex, indices, face color after upload to GPU
@@ -218,4 +221,8 @@ SDL_AppResult draw(GixScene* scene) {
     return SDL_APP_CONTINUE;
 }
 
-void quit(GixScene* scene) {}
+void quit(GixScene* scene) {
+    SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
+    CMScene* cm = scene->user_data;
+    cm_scene_destroy(cm, device);
+}
