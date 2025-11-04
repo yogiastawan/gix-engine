@@ -161,6 +161,7 @@ GixScene* gix_scene_new(GixApp* app) {
     scene->compute_pipeline = NULL;
     scene->numb_compute_pipeline = 0;
     scene->user_data = NULL;
+    scene->arena = NULL;
 
 #ifdef BUILD_DEBUG
     scene->priv = SDL_malloc(sizeof(GixSceneDebugPrivate));
@@ -194,8 +195,26 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
     scene->scene_draw = draw_func;
     scene->scene_quit = quit_func;
 }
+#ifndef BUILD_DEBUG
+b8 gix_scene_memory_init(GixScene* scene, usize size) {
+    gix_if_null_exit(scene, gix_log_debug("GixScene must not be NULL"));
+    scene->arena = gix_arena_create(size);
+    gix_if_return(scene->arena,
+                  gix_log_debug("Failed to create memory arena for GixScene"),
+                  false);
+    return true;
+}
+#endif
 
 #ifdef BUILD_DEBUG
+b8 gix_scene_memory_init(GixScene* scene, usize size) {
+    gix_if_null_exit(scene, gix_log_debug("GixScene must not be NULL"));
+    scene->arena = gix_arena_new(size + sizeof(GixSceneDebugPrivate));
+    gix_if_return(scene->arena,
+                  gix_log_debug("Failed to create memory arena for GixScene"),
+                  false);
+    return true;
+}
 void __internal_gix_scene_setup_3d_grid(GixScene* scene, u32 length_side) {
     if (scene->priv->is_grid_3d_inited) {
         return;
@@ -457,6 +476,8 @@ void gix_scene_destroy(GixScene* scene) {
     SDL_free(scene->graphic_pipeline);
     // free list compute pipeline
     SDL_free(scene->compute_pipeline);
+    // free arena
+    gix_arena_destroy(scene->arena);
 
     // free debug
 #ifdef BUILD_DEBUG

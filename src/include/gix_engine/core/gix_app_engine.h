@@ -10,6 +10,11 @@
 extern "C" {
 #endif
 
+// Define default memory arena size
+#ifndef GIX_ENGINE_ARENA_DEFAULT_SIZE
+#define GIX_ENGINE_ARENA_DEFAULT_SIZE 1048576  // 1 MB
+#endif
+
 #ifndef GIX_ENGINE_SHADER_DIR
 #define GIX_ENGINE_SHADER_DIR System Error.GIX_ENGINE_SHADER_DIR must be defined
 #endif
@@ -95,7 +100,7 @@ struct _GixScene {
     /// Number of graphics pipeline
     u8 numb_graphic_pipeline;
 
-    // List of compute pipline
+    /// List of compute pipline
     SDL_GPUGraphicsPipeline** compute_pipeline;
     /// Number of compute pipeline
     u8 numb_compute_pipeline;
@@ -109,6 +114,9 @@ struct _GixScene {
 
     /// User Data
     void* user_data;
+
+    /// Memory arena
+    GixArena* arena;
 
 #ifdef BUILD_DEBUG
     GixSceneDebugPrivate* priv;
@@ -148,6 +156,16 @@ GEAPI GixScene* gix_scene_from_file(GixApp* app, const char* file_path);
 GEAPI void gix_scene_impl(GixScene* scene, SceneInit init_func,
                           SceneEvent event_func, SceneUpdate update_func,
                           SceneDraw draw_func, SceneQuit quit_func);
+
+/**
+ * @brief Init memory arena for GixScene
+ *
+ * @param scene GixScene pointer
+ * @param size Size of memory arena in bytes
+ *
+ * @return bool true if success, false if failed
+ */
+GEAPI b8 gix_scene_memory_init(GixScene* scene, usize size);
 
 /**
  * @brief Allocate graphic pipeline of GixScene
