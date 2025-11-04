@@ -8,8 +8,6 @@ extern "C" {
 #ifdef BUILD_DEBUG
 #include <stdlib.h>
 
-static size_t exit_code = 0;
-
 #define gix_if_return(logic, exec, ret) \
     if (logic) {                        \
         exec;                           \
@@ -31,24 +29,21 @@ static size_t exit_code = 0;
         exec;                      \
     }
 #define gix_if_exit(logic, exec) \
-    ++exit_code;                 \
     if (logic) {                 \
         exec;                    \
-        exit(exit_code);         \
+        exit(1);                 \
     }
 
 #define gix_if_null_exit(ptr, exec) \
-    ++exit_code;                    \
     if (!ptr) {                     \
         exec;                       \
-        exit(exit_code + 1);        \
+        exit(2);                    \
     }
 
 #define gix_if_not_null_exit(ptr, exec) \
-    ++exit_code;                        \
     if (!ptr) {                         \
         exec;                           \
-        exit(exit_code + 1);            \
+        exit(3);                        \
     }
 #else
 #define gix_if_return(logic, exec, ret)
