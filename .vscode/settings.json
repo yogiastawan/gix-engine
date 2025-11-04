@@ -40,12 +40,8 @@
     "editor.rulers": [
         80
     ],
-    "cmake.configureArgs": [
-        "-DBUILD_EXAMPLES=ON",
-        "-DUSE_COMPILED_SHADER=OFF",
-        "-DSDL3_DIR=libs/SDL3-3.2.24",
-        "-DCGLM_DIR=libs/cglm-0.9.6",
-        "-DJSON_C_DIR=libs/json-c-0.18",
-        "-DSDL_SHADER_CROSS=/home/yogiastawan/Projects/C/tools/SDL3_shadercross-3.0.0-linux-x64/bin/shadercross"
-    ]
+    "cmake.configureOnOpen": true,
+    "cmake.configurePreset": "default",
+    "cmake.buildPreset": "default",
+    "cmake.automaticReconfigure": true,
 }
