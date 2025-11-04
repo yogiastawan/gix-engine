@@ -3,6 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <cglm/cglm.h>
+#include <gix_arena/gix_arena.h>
 #include <gix_engine/utilities/gix_engine_define.h>
 
 #ifdef __cplusplus

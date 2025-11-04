@@ -71,6 +71,12 @@ add_subdirectory(${CGLM_DIR} EXCLUDE_FROM_ALL)
 add_subdirectory(${JSON_C_DIR} EXCLUDE_FROM_ALL)
 set(CMAKE_MESSAGE_LOG_LEVEL ${_saved_CMAKE_MESSAGE_LOG_LEVEL})
 
+set(_SAVED_BUILD_EXAMPLES ${BUILD_EXAMPLES})
+set(BUILD_EXAMPLES OFF)
+add_subdirectory(libs/gix-arena)
+set(BUILD_EXAMPLES ${_SAVED_BUILD_EXAMPLES})
+
+
 
 #version
 add_compile_definitions(GIX_ENGINE_MAJOR_VERSION=${PROJECT_VERSION_MAJOR})

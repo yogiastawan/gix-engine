@@ -16,7 +16,7 @@ set(CMD_COMPILE_SHADER
 
 if(BUILD_STATIC)
     add_library(${PROJECT_NAME}-static STATIC ${srcs})
-    target_link_libraries(${PROJECT_NAME}-static SDL3::SDL3 cglm json-c ${MATH})
+    target_link_libraries(${PROJECT_NAME}-static SDL3::SDL3 cglm json-c gix-arena-static ${MATH})
     set_target_properties(${PROJECT_NAME}-static
         PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
         OUTPUT_NAME ${PROJECT_NAME})
@@ -27,7 +27,7 @@ if(BUILD_STATIC)
 endif()
 if(BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${srcs})
-    target_link_libraries(${PROJECT_NAME} SDL3::SDL3 cglm json-c ${MATH})
+    target_link_libraries(${PROJECT_NAME} SDL3::SDL3 cglm json-c gix-arena ${MATH})
     set_target_properties(${PROJECT_NAME}
         PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
         OUTPUT_NAME ${PROJECT_NAME})
