@@ -95,6 +95,8 @@ typedef SDL_AppResult (*SceneDraw)(GixScene* self);
 typedef void (*SceneQuit)(GixScene* self);
 
 struct _GixScene {
+    /// Scene identifier
+    u32 scene_id;
     /// app bind
     GixApp* app;
 
@@ -133,13 +135,14 @@ struct _GixScene {
  * @brief Create new GixScene
  *
  * @param app GixApp pointer
+ * @param id Scene identifier
  * @param numb_graphic_pipeline Number of graphic pipeline. Value: 0-255
  * @param numb_compute_pipeline Number of compute pipeline. Value: 0-255
  * @param arena_size Size of memory arena in bytes.
  *
  * @return GixScene*
  */
-GEAPI GixScene* gix_scene_new(GixApp* app, u8 numb_graphic_pipeline,
+GEAPI GixScene* gix_scene_new(GixApp* app, u32 id, u8 numb_graphic_pipeline,
                               u8 numb_compute_pipeline, usize arena_size);
 
 /**
@@ -167,6 +170,17 @@ GEAPI void gix_scene_impl(GixScene* scene, SceneInit init_func,
                           SceneDraw draw_func, SceneQuit quit_func);
 
 /**
+ * @brief Set user state of GixScene
+ *
+ * @param scene GixScene pointer
+ * @param user_state User state pointer
+ *
+ * @note The user state will be stored in GixApp user data array. Will be free
+ * when scene destroyed.
+ */
+GEAPI void gix_scene_set_user_state(GixScene* scene, void* user_state);
+
+/**
  * @brief Allocate graphic pipeline of GixScene
  *
  * @param scene GixScene pointer
@@ -187,8 +201,6 @@ static inline void gix_scene_alloc_compute_pipeline(GixScene* scene) {
     scene->compute_pipeline = gix_arena_alloc(
         scene->arena, sizeof(void*) * scene->numb_compute_pipeline);
 }
-
-
 
 #ifdef BUILD_DEBUG
 void __internal_gix_scene_setup_3d_grid(GixScene* scene, u32 lenght_side);
@@ -313,8 +325,27 @@ GEAPI SDL_Window* gix_app_get_window(GixApp* app);
  */
 GEAPI SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app);
 
+/**
+ * @brief Get supported depth texture format of GixApp GPU device.
+ * The function will check for supported depth texture format in order:
+ * D32_FLOAT, D32_FLOAT_S8_UINT, D24_UNORM, D24_UNORM_S8_UINT, D16_UNORM
+ * and return the first supported format.
+ * If none of the above formats are supported, it will return D16_UNORM as a
+ * fallback.
+ *
+ * @param app GixApp pointer
+ *
+ * @return SDL_GPUTextureFormat Supported depth texture format
+ */
 GEAPI SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app);
 
+/**
+ * @brief Set number of scene in GixApp
+ *
+ * @param app GixApp pointer
+ * @param numb_scene Number of scene
+ */
+GEAPI void gix_app_set_numb_scene(GixApp* app, u32 numb_scene);
 #ifdef __cplusplus
 }
 #endif
