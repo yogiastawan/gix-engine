@@ -514,10 +514,11 @@ void gix_scene_destroy(GixScene* scene) {
         SDL_ReleaseGPUComputePipeline(scene->app->device,
                                       scene->compute_pipeline[i]);
     }
-
-    if (scene->app->user_data[scene->scene_id]) {
-        SDL_free(scene->app->user_data[scene->scene_id]);
-        scene->app->user_data[scene->scene_id] = NULL;
+    if (scene->app->user_data) {
+        if (scene->app->user_data[scene->scene_id]) {
+            SDL_free(scene->app->user_data[scene->scene_id]);
+            scene->app->user_data[scene->scene_id] = NULL;
+        }
     }
 
     // free debug
