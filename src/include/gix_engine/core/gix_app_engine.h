@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include <cglm/cglm.h>
 #include <gix_arena/gix_arena.h>
+#include <gix_engine/core/gix_engine_checker.h>
+#include <gix_engine/core/gix_engine_log.h>
 #include <gix_engine/utilities/gix_engine_define.h>
 
 #ifdef __cplusplus
@@ -102,7 +104,7 @@ struct _GixScene {
     u8 numb_graphic_pipeline;
 
     /// List of compute pipline
-    SDL_GPUGraphicsPipeline** compute_pipeline;
+    SDL_GPUComputePipeline** compute_pipeline;
     /// Number of compute pipeline
     u8 numb_compute_pipeline;
 
@@ -118,6 +120,7 @@ struct _GixScene {
 
     /// Memory arena
     GixArena* arena;
+    usize arena_size;
 
 #ifdef BUILD_DEBUG
     GixSceneDebugPrivate* priv;
@@ -130,9 +133,14 @@ struct _GixScene {
  * @brief Create new GixScene
  *
  * @param app GixApp pointer
+ * @param numb_graphic_pipeline Number of graphic pipeline. Value: 0-255
+ * @param numb_compute_pipeline Number of compute pipeline. Value: 0-255
+ * @param arena_size Size of memory arena in bytes.
+ *
  * @return GixScene*
  */
-GEAPI GixScene* gix_scene_new(GixApp* app);
+GEAPI GixScene* gix_scene_new(GixApp* app, u8 numb_graphic_pipeline,
+                              u8 numb_compute_pipeline, usize arena_size);
 
 /**
  * @brief Create new GixScene from file
@@ -159,40 +167,28 @@ GEAPI void gix_scene_impl(GixScene* scene, SceneInit init_func,
                           SceneDraw draw_func, SceneQuit quit_func);
 
 /**
- * @brief Init memory arena for GixScene
- *
- * @param scene GixScene pointer
- * @param size Size of memory arena in bytes
- *
- * @return bool true if success, false if failed
- */
-GEAPI b8 gix_scene_memory_init(GixScene* scene, usize size);
-
-/**
  * @brief Allocate graphic pipeline of GixScene
  *
  * @param scene GixScene pointer
- * @param numb Number of graphic pipeline. Value: 0-255
  * @note This function must be called once only on init scene.
  */
-static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene, u8 numb) {
-    scene->numb_graphic_pipeline = numb;
-    scene->graphic_pipeline =
-        SDL_malloc(sizeof(void*) * scene->numb_graphic_pipeline);
+static inline void gix_scene_alloc_graphic_pipeline(GixScene* scene) {
+    scene->graphic_pipeline = gix_arena_alloc(
+        scene->arena, sizeof(void*) * scene->numb_graphic_pipeline);
 }
 
 /**
  * @brief Allocate compute pipeline of GixScene
  *
  * @param scene GixScene pointer
- * @param numb Number of compute pipeline. Value: 0-255
  * @note This function must be called once only on init scene.
  */
-static inline void gix_scene_alloc_compute_pipeline(GixScene* scene, u8 numb) {
-    scene->numb_compute_pipeline = numb;
-    scene->compute_pipeline =
-        SDL_malloc(sizeof(void*) * scene->numb_compute_pipeline);
+static inline void gix_scene_alloc_compute_pipeline(GixScene* scene) {
+    scene->compute_pipeline = gix_arena_alloc(
+        scene->arena, sizeof(void*) * scene->numb_compute_pipeline);
 }
+
+
 
 #ifdef BUILD_DEBUG
 void __internal_gix_scene_setup_3d_grid(GixScene* scene, u32 lenght_side);

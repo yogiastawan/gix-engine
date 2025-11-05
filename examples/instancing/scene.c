@@ -64,7 +64,7 @@ static void quit(GixScene* self);
 static void update_model_matrix(MyScene* scene, Uint64 delta_time);
 
 GixScene* create_scene(GixApp* app) {
-    GixScene* scene = gix_scene_new(app);
+    GixScene* scene = gix_scene_new(app, 1, 0, 0);
     gix_scene_impl(scene, init, event, update, draw, quit);
     return scene;
 }
@@ -129,7 +129,7 @@ SDL_AppResult init(GixScene* self) {
     scene->depth_texture = SDL_CreateGPUTexture(device, &depth_texture_info);
 
     // setup pipe line
-    gix_scene_alloc_graphic_pipeline(self, 1);
+    gix_scene_alloc_graphic_pipeline(self);
     // load shader
     SDL_GPUShader* vertex_shader = gix_load_shader(
         device, "./shader/SPIRV/instancing.vert.spv",

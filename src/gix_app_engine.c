@@ -3,8 +3,6 @@
 #include <SDL3/SDL_main.h>
 // #endif
 #include <gix_engine/core/gix_app_engine.h>
-#include <gix_engine/core/gix_engine_checker.h>
-#include <gix_engine/core/gix_engine_log.h>
 #include <gix_engine/core/gix_engine_shader.h>
 
 #undef __internal_gix_scene_setup_3d_grid
@@ -56,6 +54,7 @@ typedef struct Grid3DUniform {
 
 static GixApp* gix_app_new(const char* name);
 static void gix_app_destroy(GixApp* app);
+static b8 gix_scene_memory_init(GixScene* scene);
 
 static char* concate_str(const char* dir, const char* file_name) {
     size_t dir_len = SDL_strlen(dir);
@@ -75,7 +74,6 @@ static void gix_app_sdl_init() {
     SDL_SetLogPriorities(SDL_LOG_PRIORITY_DEBUG);
 #endif
 }
-// #ifdef GIX_APP_MAIN
 
 // SDL CYCLE
 SDL_AppResult SDL_AppInit(void** app_state, int argc, char* argv[]) {
@@ -148,23 +146,27 @@ void SDL_AppQuit(void* app_state, SDL_AppResult result) {
 
 // END SDL CYCLE
 
-// #endif
-
 // private function
-GixScene* gix_scene_new(GixApp* app) {
+GixScene* gix_scene_new(GixApp* app, u8 numb_graphic_pipeline,
+                        u8 numb_compute_pipeline, usize arena_size) {
     gix_log("Create new GixScene");
 
     GixScene* scene = SDL_malloc(sizeof(GixScene));
     scene->app = app;
     scene->graphic_pipeline = NULL;
-    scene->numb_graphic_pipeline = 0;
+    scene->numb_graphic_pipeline = numb_graphic_pipeline;
     scene->compute_pipeline = NULL;
-    scene->numb_compute_pipeline = 0;
+    scene->numb_compute_pipeline = numb_compute_pipeline;
     scene->user_data = NULL;
-    scene->arena = NULL;
+
+    scene->arena_size = arena_size;
+
+    gix_scene_memory_init(scene);
+    gix_if_exit(!scene->arena,
+                gix_log_debug("Failed to create memory arena for GixScene"));
 
 #ifdef BUILD_DEBUG
-    scene->priv = SDL_malloc(sizeof(GixSceneDebugPrivate));
+    scene->priv = gix_arena_alloc(scene->arena, sizeof(GixSceneDebugPrivate));
     scene->priv->vertex_grid_3d_buffer = NULL;
     scene->priv->line_grid_3d_buffer = NULL;
     scene->priv->grid_3d_numb_line = GIX_ENGINE_NUMB_GRID_3D_LINE_DEFAULT;
@@ -195,10 +197,18 @@ void gix_scene_impl(GixScene* scene, SceneInit init_func, SceneEvent event_func,
     scene->scene_draw = draw_func;
     scene->scene_quit = quit_func;
 }
+
 #ifndef BUILD_DEBUG
 b8 gix_scene_memory_init(GixScene* scene, usize size) {
     gix_if_null_exit(scene, gix_log_debug("GixScene must not be NULL"));
-    scene->arena = gix_arena_create(size);
+    scene->arena =
+        gix_arena_create(size +
+                         sizeof(SDL_GPUGraphicsPipeline*) *
+                             scene->numb_graphic_pipeline  // graphic pipeline
+                         + sizeof(SDL_GPUComputePipeline*) *
+                               scene->numb_compute_pipeline  // compute pipeline
+                         + sizeof(void*)                     // user_data
+        );
     gix_if_return(scene->arena,
                   gix_log_debug("Failed to create memory arena for GixScene"),
                   false);
@@ -207,14 +217,31 @@ b8 gix_scene_memory_init(GixScene* scene, usize size) {
 #endif
 
 #ifdef BUILD_DEBUG
-b8 gix_scene_memory_init(GixScene* scene, usize size) {
+b8 gix_scene_memory_init(GixScene* scene) {
     gix_if_null_exit(scene, gix_log_debug("GixScene must not be NULL"));
-    scene->arena = gix_arena_new(size + sizeof(GixSceneDebugPrivate));
-    gix_if_return(scene->arena,
+    scene->arena = gix_arena_new(
+        scene->arena_size + sizeof(GixSceneDebugPrivate)  // private
+        + sizeof(SDL_GPUGraphicsPipeline*) *
+              scene->numb_graphic_pipeline  // graphic pipeline
+        + sizeof(SDL_GPUComputePipeline*) *
+              scene->numb_compute_pipeline  // compute pipeline
+        + sizeof(void*)                     // user_data
+    );
+
+    gix_log("Create memory arena: %zu bytes",
+            scene->arena_size + sizeof(GixSceneDebugPrivate) +
+                sizeof(SDL_GPUGraphicsPipeline*) *
+                    scene->numb_graphic_pipeline  // graphic pipeline
+                + sizeof(SDL_GPUComputePipeline*) *
+                      scene->numb_compute_pipeline  // compute pipeline
+                + sizeof(void*));
+
+    gix_if_return(!scene->arena,
                   gix_log_debug("Failed to create memory arena for GixScene"),
                   false);
     return true;
 }
+
 void __internal_gix_scene_setup_3d_grid(GixScene* scene, u32 length_side) {
     if (scene->priv->is_grid_3d_inited) {
         return;
@@ -460,8 +487,7 @@ void gix_scene_destroy(GixScene* scene) {
     gix_log("Destroy GixScene");
     gix_if_null_exit(scene, gix_log_debug("Can not destroy NULl of scene"));
     SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
-    // free user data
-    SDL_free(scene->user_data);
+
     // free graphic pipelines
     for (u8 i = 0; i < scene->numb_graphic_pipeline; i++) {
         SDL_ReleaseGPUGraphicsPipeline(scene->app->device,
@@ -469,15 +495,9 @@ void gix_scene_destroy(GixScene* scene) {
     }
     // free compute pipeline
     for (u8 i = 0; i < scene->numb_compute_pipeline; i++) {
-        SDL_ReleaseGPUGraphicsPipeline(scene->app->device,
-                                       scene->compute_pipeline[i]);
+        SDL_ReleaseGPUComputePipeline(scene->app->device,
+                                      scene->compute_pipeline[i]);
     }
-    // free list graphic pipeline
-    SDL_free(scene->graphic_pipeline);
-    // free list compute pipeline
-    SDL_free(scene->compute_pipeline);
-    // free arena
-    gix_arena_destroy(scene->arena);
 
     // free debug
 #ifdef BUILD_DEBUG
@@ -491,9 +511,10 @@ void gix_scene_destroy(GixScene* scene) {
     if (scene->priv->grid_3d_pipeLine) {
         SDL_ReleaseGPUGraphicsPipeline(device, scene->priv->grid_3d_pipeLine);
     }
-
-    SDL_free(scene->priv);
 #endif
+
+    // free arena
+    gix_arena_destroy(scene->arena);
 
     // free scene
     SDL_free(scene);
