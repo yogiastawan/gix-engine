@@ -118,7 +118,7 @@ struct _GixScene {
     SceneQuit scene_quit;
 
     /// User Data
-    void* user_data;
+    void* scene_data;
 
     /// Memory arena
     GixArena* arena;

@@ -171,7 +171,7 @@ GixScene* gix_scene_new(GixApp* app, u32 id, u8 numb_graphic_pipeline,
     scene->numb_graphic_pipeline = numb_graphic_pipeline;
     scene->compute_pipeline = NULL;
     scene->numb_compute_pipeline = numb_compute_pipeline;
-    scene->user_data = NULL;
+    scene->scene_data = NULL;
 
     scene->arena_size = arena_size;
 
