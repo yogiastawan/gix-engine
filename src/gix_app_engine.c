@@ -89,6 +89,14 @@ SDL_AppResult SDL_AppInit(void** app_state, int argc, char* argv[]) {
     GixApp* app = gix_app_new("GixApp");
     app_state[0] = app;
     gix_app_init(app);
+
+    // if no user data setup, create 1 item
+    if (!app->user_data) {
+        app->numb_scene = 1;
+        app->user_data = SDL_malloc(sizeof(void*) * app->numb_scene);
+        app->user_data[0] = NULL;
+    }
+
     SDL_ShowWindow(app->window);
     return SDL_APP_CONTINUE;
 }
@@ -210,6 +218,11 @@ void gix_scene_set_user_state(GixScene* scene, void* user_state) {
     gix_if_exit(scene->scene_id >= scene->app->numb_scene,
                 gix_log_debug("GixScene id %u is out of range, numb_scene %u",
                               scene->scene_id, scene->app->numb_scene));
+
+    //   if already set, do nothing
+    if (scene->app->user_data[scene->scene_id]) {
+        return;
+    }
 
     scene->app->user_data[scene->scene_id] = user_state;
 }
@@ -499,9 +512,10 @@ void __internal_gix_scene_set_3d_grid_color(GixScene* scene,
 }
 #endif
 
-void gix_scene_destroy(GixScene* scene) {
-    gix_log("Destroy GixScene");
-    gix_if_null_exit(scene, gix_log_debug("Can not destroy NULl of scene"));
+GEAPI void gix_scene_exit(GixScene* scene) {
+    gix_log("Exit GixScene");
+    gix_if_null_exit(scene, gix_log_debug("GixScene should not NULL"));
+
     SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
 
     // free graphic pipelines
@@ -514,11 +528,7 @@ void gix_scene_destroy(GixScene* scene) {
         SDL_ReleaseGPUComputePipeline(scene->app->device,
                                       scene->compute_pipeline[i]);
     }
-    if (scene->app->user_data) {
-        if (scene->app->user_data[scene->scene_id]) {
-            SDL_free(scene->app->user_data[scene->scene_id]);
-            scene->app->user_data[scene->scene_id] = NULL;
-        }
+    if (scene->app->numb_scene > scene->scene_id) {
     }
 
     // free debug
@@ -537,6 +547,56 @@ void gix_scene_destroy(GixScene* scene) {
 
     // free arena
     gix_arena_destroy(scene->arena);
+
+    scene->scene_quit(scene);
+
+    // free scene
+    SDL_free(scene);
+}
+
+void gix_scene_destroy(GixScene* scene) {
+    gix_log("Destroy GixScene");
+    gix_if_null_exit(scene, gix_log_debug("Can not destroy NULl of scene"));
+    SDL_GPUDevice* device = gix_app_get_gpu_device(scene->app);
+
+    // free graphic pipelines
+    for (u8 i = 0; i < scene->numb_graphic_pipeline; i++) {
+        SDL_ReleaseGPUGraphicsPipeline(scene->app->device,
+                                       scene->graphic_pipeline[i]);
+    }
+    // free compute pipeline
+    for (u8 i = 0; i < scene->numb_compute_pipeline; i++) {
+        SDL_ReleaseGPUComputePipeline(scene->app->device,
+                                      scene->compute_pipeline[i]);
+    }
+
+    gix_if_exit(scene->scene_id >= scene->app->numb_scene,
+                gix_log_debug("GixScene id %u is out of range, numb_scene %u",
+                              scene->scene_id, scene->app->numb_scene));
+
+    if (scene->app->user_data[scene->scene_id]) {
+        SDL_free(scene->app->user_data[scene->scene_id]);
+        scene->app->user_data[scene->scene_id] = NULL;
+    }
+
+    // free debug
+#ifdef BUILD_DEBUG
+    if (scene->priv->vertex_grid_3d_buffer) {
+        SDL_ReleaseGPUBuffer(device, scene->priv->vertex_grid_3d_buffer);
+    }
+
+    if (scene->priv->line_grid_3d_buffer) {
+        SDL_ReleaseGPUBuffer(device, scene->priv->line_grid_3d_buffer);
+    }
+    if (scene->priv->grid_3d_pipeLine) {
+        SDL_ReleaseGPUGraphicsPipeline(device, scene->priv->grid_3d_pipeLine);
+    }
+#endif
+
+    // free arena
+    gix_arena_destroy(scene->arena);
+
+    scene->scene_quit(scene);
 
     // free scene
     SDL_free(scene);
@@ -620,15 +680,29 @@ void gix_app_set_loading_scene(GixApp* app, GixScene* scene) {
     gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
     gix_if_null_exit(scene, gix_log_debug("GixScene should not NULL"));
     app->loading_scene = scene;
+    gix_scene_init(app->loading_scene);
 }
 
-SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene) {
+SDL_AppResult gix_app_change_scene(GixApp* app, GixScene* scene,
+                                   b8 clear_user_data) {
     gix_log("Set scene to GixApp");
 
     gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
     gix_if_null_exit(scene, gix_log_debug("GixScene should not NULL"));
 
     // TODO! Loading scene here
+    if (app->current_scene) {
+        switch (clear_user_data) {
+            case true:
+                gix_scene_destroy(app->current_scene);
+                break;
+
+            default:
+                gix_scene_exit(app->current_scene);
+                break;
+        }
+    }
+
     // set is_onload_scene to true
     app->is_onload_scene = true;
     // init scene
@@ -674,13 +748,18 @@ SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app) {
     return format;
 }
 
-GEAPI void gix_app_set_numb_scene(GixApp* app, u32 numb_scene) {
+GEAPI void gix_app_setup_user_data(GixApp* app, u32 numb_scene) {
     gix_if_null_exit(app, gix_log_debug("GixApp should not NULL"));
+
+    numb_scene = numb_scene <= 0 ? 1 : numb_scene;
 
     app->numb_scene = numb_scene;
 
-    // allocate user data array
+    // allocate user data array (zero-initialize for speed)
     app->user_data = SDL_malloc(sizeof(void*) * numb_scene);
+    if (app->user_data) {
+        SDL_memset(app->user_data, 0, sizeof(void*) * numb_scene);
+    }
 }
 
 // private function
@@ -690,12 +769,12 @@ void gix_app_destroy(GixApp* app) {
     gix_if_null_exit(app, gix_log_debug("Can not destroy of NULL GixApp"));
 
     if (app->loading_scene) {
-        app->loading_scene->scene_quit(app->loading_scene);
+        // app->loading_scene->scene_quit(app->loading_scene);
         gix_scene_destroy(app->loading_scene);
     }
 
     if (app->current_scene) {
-        app->current_scene->scene_quit(app->current_scene);
+        // app->current_scene->scene_quit(app->current_scene);
         gix_scene_destroy(app->current_scene);
     }
 

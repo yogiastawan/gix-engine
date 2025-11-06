@@ -221,9 +221,20 @@ void __internal_gix_scene_set_3d_grid_color(GixScene* scene, const u8 color[4]);
 #endif
 
 /**
+ * @brief Exit GixScene
+ *
+ * @param scene GixScene pointer
+ *
+ * @note This function will destroy scene, but keep user data in GixApp
+ */
+GEAPI void gix_scene_exit(GixScene* scene);
+
+/**
  * @brief Destroy GixScene
  *
  * @param scene GixScene pointer
+ *
+ * @note This function will destroy scene and free user data in GixApp
  */
 GEAPI void gix_scene_destroy(GixScene* scene);
 
@@ -304,10 +315,14 @@ GEAPI void gix_app_set_loading_scene(GixApp* app, GixScene* scene);
  *
  * @param app GixApp pointer
  * @param scene GixScene pointer
+ * @param clear_user_data Bool value to clear previous scene's user data or not
+ * when changing
+ *
  * @return SDL_AppResult. return SDL_APP_CONTINUE if success, SDL_APP_FAILURE if
  * failed
  */
-GEAPI SDL_AppResult gix_app_set_scene(GixApp* app, GixScene* scene);
+GEAPI SDL_AppResult gix_app_change_scene(GixApp* app, GixScene* scene,
+                                         b8 clear_user_data);
 
 /**
  * @brief Get GixApp window
@@ -340,12 +355,16 @@ GEAPI SDL_GPUDevice* gix_app_get_gpu_device(GixApp* app);
 GEAPI SDL_GPUTextureFormat gix_app_get_depth_texture_format(GixApp* app);
 
 /**
- * @brief Set number of scene in GixApp
+ * @brief Setup user data array for GixApp
  *
  * @param app GixApp pointer
- * @param numb_scene Number of scene
+ * @param numb_scene Number of scene. This must be not zero. If zero is given, 1
+ * is used as number of scene.
+ *
+ * @note If this function never called, GixApp will create user data array with
+ * 1 item automatically when initializing the app.
  */
-GEAPI void gix_app_set_numb_scene(GixApp* app, u32 numb_scene);
+GEAPI void gix_app_setup_user_data(GixApp* app, u32 numb_scene);
 #ifdef __cplusplus
 }
 #endif
